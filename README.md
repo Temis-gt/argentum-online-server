@@ -121,6 +121,10 @@ Please note this is not free software and you will have to buy your own license 
     The following information was included with the event: 
     ```
 
+# Protocol Updates
+When adding a new command or functionality to the protocol file, it is essential for administrators to also update the associated project for the CI/CD
+
+[Protocol Generator Repository (private repository)](https://github.com/ao-org/ProtocolGenerator)
 
 ## Star History
 
