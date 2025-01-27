@@ -716,7 +716,9 @@ On Error GoTo Handler
         Subasta.SubastaHabilitada = True
         Subasta.HaySubastaActiva = False
         Call ResetMeteo
-        Call InitializePacketList
+#If DIRECT_PLAY = 0 Then
+        Call Protocol_Writes.InitializeAuxiliaryBuffer
+#End If
 
 
         Call modNetwork.Listen(MaxUsers, ListenIp, CStr(Puerto))
@@ -868,9 +870,9 @@ End Function
 
 Sub MostrarNumUsers()
 On Error GoTo MostrarNumUsers_Err
-        'Call SendData(SendTarget.ToAll, 0, PrepareMessageOnlineUser(NumUsers))
+        Call SendData(SendTarget.ToAll, 0, PrepareMessageOnlineUser(NumUsers))
         frmMain.CantUsuarios.Caption = "Numero de usuarios jugando: " & NumUsers
-         Exit Sub
+        Exit Sub
 
 MostrarNumUsers_Err:
 106     Call TraceError(Err.Number, Err.Description, "General.MostrarNumUsers", Erl)
