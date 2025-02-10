@@ -920,7 +920,7 @@ On Error Resume Next
             Err.raise -1, "Invalid Message"
     End Select
     
-    'If (Message.GetAvailable() > 0) Then
+
     If (Reader.GetAvailable() > 0) Then
          If Not IsMissing(optional_user_index) Then ' userindex may be invalid here
                 Err.raise &HDEADBEEF, "HandleIncomingData", "The client message with ID: '" & PacketId & "' has the wrong size '" & Reader.GetAvailable() & "' bytes de mas por el usuario '" & UserList(UserIndex).Name & "'"
@@ -928,6 +928,10 @@ On Error Resume Next
                 Err.raise &HDEADBEEF, "HandleIncomingData", "The client message with ID: '" & PacketId & "' has the wrong size '" & Reader.GetAvailable() & "' bytes de mas por el usuario '"
          End If
     End If
+    
+    #If DIRECT_PLAY = 1 Then
+        Reader.Clear
+    #End If
     
     Call PerformTimeLimitCheck(performance_timer, "Protocol handling message " & PacketId, 100)
 
@@ -6876,41 +6880,8 @@ ErrHandler:
 End Sub
 
 
-'HarThaoS: Agrego perdón faccionario.
-
-
-' Handles the "SendPosMovimiento" message.
-
 Private Sub HandleSendPosMovimiento(ByVal UserIndex As Integer)
-
-        '***************************************************
-        'Author: Martín Trionfetti - HarThaoS
-        'Last Modification: 6/4/2022
-        '***************************************************
-        On Error GoTo ErrHandler
-
-100     With UserList(UserIndex)
-        
-            Dim PosX As Integer
-            Dim PosY As Integer
-            Dim tUser As Integer
-        
-102         PosX = Reader.ReadString16()
-103         PosY = Reader.ReadString16()
-
-            If IsValidUserRef(.flags.GMMeSigue) Then
-                Call WriteRecievePosSeguimiento(.flags.GMMeSigue.ArrayIndex, posX, posY)
-                'CUANDO DESCONECTA SEGUIDOR Y SEGUIDO VER FLAGS
-            End If
-            
-        End With
-
-        Exit Sub
-
-ErrHandler:
-138     Call TraceError(Err.Number, Err.Description, "Protocol.HandleReviveChar", Erl)
-140
-
+'TODO: delete
 End Sub
 
 ' Handles the "SendPosMovimiento" message.
