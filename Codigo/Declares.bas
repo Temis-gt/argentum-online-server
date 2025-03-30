@@ -1417,6 +1417,7 @@ Public Type t_Quest
     DescFinal As String
     RequiredLevel As Byte
     RequiredClass As Byte
+    LimitLevel As Byte
     
     RequiredQuest As Integer 'Changed in order to develop more than 255 quests
     Trabajador As Boolean
@@ -1766,7 +1767,9 @@ Public Type t_ModClase
     DañoArmas As Double
     DañoProyectiles As Double
     DañoWrestling As Double
-    ModApuñalar As Double
+    ModApunalar As Double
+    ModStabbingNPCMin As Double
+    ModStabbingNPCMax As Double
     Escudo As Double
     ManaInicial As Double
     AumentoSta As Integer
