@@ -672,6 +672,15 @@ Function MeterItemEnInventario(ByVal UserIndex As Integer, ByRef MiObj As t_Obj)
         Dim Y    As Integer
 
         Dim Slot As Integer
+        
+        If MiObj.ObjIndex = SvrConfig.GetValue("OBJ_QUEST1_ID") Then
+            If Slot <= 0 Then
+               Call WriteLocaleMsg(UserIndex, MsgInventoryIsFull, e_FontTypeNames.FONTTYPE_FIGHT)
+               MeterItemEnInventario = False
+               Exit Function
+            End If
+        End If
+        
         If MiObj.ObjIndex = 12 Then
             UserList(UserIndex).Stats.GLD = UserList(UserIndex).Stats.GLD + MiObj.amount
             MeterItemEnInventario = True
@@ -1817,6 +1826,11 @@ Sub UseInvItem(ByVal UserIndex As Integer, ByVal Slot As Byte, ByVal ByClick As 
 132             Call WriteConsoleMsg(UserIndex, "Necesitas ser nivel " & obj.MinELV & " para usar este item.", e_FontTypeNames.FONTTYPE_INFO)
                 Exit Sub
     
+            End If
+            
+            If .Stats.ELV > obj.MaxLEV And obj.MaxLEV > 0 Then
+                Call WriteConsoleMsg(UserIndex, "Este objeto no puede ser utilizado por personajes de nivel " & obj.MaxLEV & " o superior.", e_FontTypeNames.FONTTYPE_INFO)
+                Exit Sub
             End If
     
 134         ObjIndex = .Invent.Object(Slot).ObjIndex
