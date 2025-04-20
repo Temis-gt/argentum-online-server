@@ -2207,13 +2207,11 @@ Public Sub DoPescar(ByVal UserIndex As Integer, _
                 ' Genero el obj pez que pesqué y su cantidad
 126             MiObj.ObjIndex = ObtenerPezRandom(ObjData(.invent.HerramientaEqpObjIndex).Power)
 127             objValue = max(ObjData(MiObj.ObjIndex).Valor / 3, 1)
-                'si esta macreando y para que esten mas atentos les mando un NPC
+                'si esta macreando y para que esten mas atentos les mando un NPC y saco el macro de trabajar
                 If MiObj.ObjIndex = (SvrConfig.GetValue("FISHING_SPECIALFISH1_ID") Or MiObj.ObjIndex = SvrConfig.GetValue("FISHING_SPECIALFISH2_ID")) And (UserList(UserIndex).pos.Map) <> SvrConfig.GetValue("FISHING_MAP_SPECIAL_FISH1_ID") Then
                     MiObj.ObjIndex = SvrConfig.GetValue("FISHING_SPECIALFISH1_REMPLAZO_ID")
                     If MapInfo(UserList(UserIndex).pos.Map).Seguro = 0 Then NpcIndex = SpawnNpc(SvrConfig.GetValue("NPC_WATCHMAN_ID"), .pos, True, False)
-                    Call HandleRomperCania(UserIndex)
-                    Call WriteLocaleMsg(UserIndex, "1320", e_FontTypeNames.FONTTYPE_INFO)
-                    
+                    Call WriteMacroTrabajoToggle(UserIndex, False)
                 End If
                 
 128             MiObj.amount = Round(Reward / objValue)
@@ -3426,6 +3424,14 @@ Sub DoDomar(ByVal UserIndex As Integer, ByVal NpcIndex As Integer)
 120                 puntosDomar = puntosDomar / 118 'para que solo el druida dome
 
                 End If
+                
+                'No tiene nivel suficiente?
+                If NpcList(NpcIndex).MinTameLevel > .Stats.ELV Then
+                    ' Msg1321=Debes ser nivel ¬1 o superior para domar esta criatura.
+                    Call WriteLocaleMsg(UserIndex, "1321", e_FontTypeNames.FONTTYPE_INFO)
+                    Exit Sub
+                End If
+
 
 122             If NpcList(NpcIndex).flags.Domable <= puntosDomar And RandomNumber(1, 5) = 1 Then
 

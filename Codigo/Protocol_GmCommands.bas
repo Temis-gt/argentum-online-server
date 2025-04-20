@@ -258,69 +258,80 @@ ErrHandler:
 End Sub
 
 Public Sub HandleGamble(ByVal UserIndex As Integer)
-        
-        On Error GoTo HandleGamble_Err
-        'Author: Juan Martín Sotuyo Dodero (Maraxus)
-100     With UserList(UserIndex)
+    On Error GoTo HandleGamble_Err
 
-            Dim amount As Integer
-102             amount = Reader.ReadInt16()
-        
-104         If .flags.Muerto = 1 Then
-                'Msg77=¡¡Estás muerto!!.
-106             Call WriteLocaleMsg(UserIndex, "77", e_FontTypeNames.FONTTYPE_INFO)
-                
-108         ElseIf Not IsValidNpcRef(.flags.TargetNPC) Then
-                'Validate target NPC
-110             ' Msg530=Primero tenés que seleccionar un personaje, haz click izquierdo sobre él.
+    With UserList(UserIndex)
+
+        Dim amount As Integer
+        amount = reader.ReadInt16()
+
+        Dim npcIndex As Integer
+        Dim charIndex As Integer
+
+        If Not IsValidNpcRef(.flags.TargetNPC) Then
             Call WriteLocaleMsg(UserIndex, "530", e_FontTypeNames.FONTTYPE_INFO)
+            Exit Sub
+        End If
 
-112         ElseIf Distancia(NpcList(.flags.TargetNPC.ArrayIndex).Pos, .Pos) > 10 Then
-114             Call WriteLocaleMsg(UserIndex, "8", e_FontTypeNames.FONTTYPE_INFO)
-                
-116         ElseIf NpcList(.flags.TargetNPC.ArrayIndex).npcType <> e_NPCType.Timbero Then
-118             Call WriteChatOverHead(UserIndex, "No tengo ningún interés en apostar.", NpcList(.flags.TargetNPC.ArrayIndex).Char.charindex, vbWhite)
+        npcIndex = .flags.TargetNPC.ArrayIndex
+        charIndex = NpcList(npcIndex).Char.charIndex
 
-120         ElseIf amount < 1 Then
-122             Call WriteChatOverHead(UserIndex, "El mínimo de apuesta es 1 moneda.", NpcList(.flags.TargetNPC.ArrayIndex).Char.charindex, vbWhite)
+        If .flags.Muerto = 1 Then
+            Call WriteLocaleMsg(UserIndex, "77", e_FontTypeNames.FONTTYPE_INFO)
 
-124         ElseIf amount > 5000 Then
-126             Call WriteChatOverHead(UserIndex, "El máximo de apuesta es 5.000 monedas.", NpcList(.flags.TargetNPC.ArrayIndex).Char.charindex, vbWhite)
+        ElseIf Distancia(NpcList(npcIndex).pos, .pos) > 10 Then
+            Call WriteLocaleMsg(UserIndex, "8", e_FontTypeNames.FONTTYPE_INFO)
 
-128         ElseIf .Stats.GLD < amount Then
-130             Call WriteChatOverHead(UserIndex, "No tienes esa cantidad.", NpcList(.flags.TargetNPC.ArrayIndex).Char.charindex, vbWhite)
+        ElseIf NpcList(npcIndex).npcType <> e_NPCType.Timbero Then
+            Call WriteLocaleChatOverHead(UserIndex, 1322, vbNullString, charIndex, vbWhite)
 
+        ElseIf amount < 1 Then
+            Call WriteLocaleChatOverHead(UserIndex, 1323, vbNullString, charIndex, vbWhite)
+
+        ElseIf amount > 5000 Then
+            Call WriteLocaleChatOverHead(UserIndex, 1324, vbNullString, charIndex, vbWhite)
+
+        ElseIf .Stats.GLD < amount Then
+            Call WriteLocaleChatOverHead(UserIndex, 1325, vbNullString, charIndex, vbWhite)
+
+        Else
+            If RandomNumber(1, 100) <= 10 Then
+                ' GANADOR
+                .Stats.GLD = .Stats.GLD + amount
+                Call WriteLocaleChatOverHead(UserIndex, GetWinnerMsgID(), PonerPuntos(amount), charindex, vbWhite)
+
+                Apuestas.Perdidas = Apuestas.Perdidas + amount
+                Call WriteVar(DatPath & "apuestas.dat", "Main", "Perdidas", CStr(Apuestas.Perdidas))
             Else
-132             If RandomNumber(1, 100) <= 10 Then
-134                 .Stats.GLD = .Stats.GLD + amount
-136                 Call WriteChatOverHead(UserIndex, "¡Felicidades! Has ganado " & PonerPuntos(amount) & " monedas de oro!", NpcList(.flags.TargetNPC.ArrayIndex).Char.charindex, vbWhite)
-                
-138                 Apuestas.Perdidas = Apuestas.Perdidas + amount
-140                 Call WriteVar(DatPath & "apuestas.dat", "Main", "Perdidas", CStr(Apuestas.Perdidas))
-                Else
-142                 .Stats.GLD = .Stats.GLD - amount
-144                 Call WriteChatOverHead(UserIndex, "Lo siento, has perdido " & PonerPuntos(amount) & " monedas de oro.", NpcList(.flags.TargetNPC.ArrayIndex).Char.charindex, vbWhite)
-                
-146                 Apuestas.Ganancias = Apuestas.Ganancias + amount
-148                 Call WriteVar(DatPath & "apuestas.dat", "Main", "Ganancias", CStr(Apuestas.Ganancias))
+                ' PERDEDOR
+                .Stats.GLD = .Stats.GLD - amount
+                Call WriteLocaleChatOverHead(UserIndex, GetLoserMsgID(), PonerPuntos(amount), charindex, vbRed)
 
-                End If
-            
-150             Apuestas.Jugadas = Apuestas.Jugadas + 1
-152             Call WriteVar(DatPath & "apuestas.dat", "Main", "Jugadas", CStr(Apuestas.Jugadas))
-154             Call WriteUpdateGold(UserIndex)
-
+                Apuestas.Ganancias = Apuestas.Ganancias + amount
+                Call WriteVar(DatPath & "apuestas.dat", "Main", "Ganancias", CStr(Apuestas.Ganancias))
             End If
 
-        End With
+            Apuestas.Jugadas = Apuestas.Jugadas + 1
+            Call WriteVar(DatPath & "apuestas.dat", "Main", "Jugadas", CStr(Apuestas.Jugadas))
+            Call WriteUpdateGold(UserIndex)
+        End If
 
-        Exit Sub
+    End With
+
+    Exit Sub
 
 HandleGamble_Err:
-156     Call TraceError(Err.Number, Err.Description, "Protocol.HandleGamble", Erl)
-158
-        
+    Call TraceError(Err.Number, Err.Description, "Protocol.HandleGamble", Erl)
 End Sub
+
+Public Function GetWinnerMsgID() As Integer
+    GetWinnerMsgID = 1328 + Int(Rnd * 4)
+End Function
+
+Public Function GetLoserMsgID() As Integer
+    GetLoserMsgID = 1332 + Int(Rnd * 4)
+End Function
+
  
 Public Sub HandleDenounce(ByVal UserIndex As Integer)
         On Error GoTo ErrHandler
@@ -1940,8 +1951,8 @@ Public Sub HandleReviveChar(ByVal UserIndex As Integer)
 118                     If .flags.Muerto = 1 Then
                             If UserList(UserIndex).flags.Privilegios And e_PlayerType.SemiDios Then
                                 If MapInfo(.Pos.map).Seguro = 0 Or EsMapaEvento(.Pos.map) = False Then
-'Msg962= Servidor » No puedes revivir en una zona insegura.
-Call WriteLocaleMsg(UserIndex, "962", e_FontTypeNames.FONTTYPE_INFO)
+                                'Msg962= Servidor » No puedes revivir en una zona insegura.
+                                Call WriteLocaleMsg(UserIndex, "962", e_FontTypeNames.FONTTYPE_INFO)
                                      Exit Sub
                                 End If
                             End If
@@ -1999,8 +2010,8 @@ Public Sub HandleOnlineGM(ByVal UserIndex As Integer)
 120             list = Left$(list, Len(list) - 2)
 122             Call WriteConsoleMsg(UserIndex, list & ".", e_FontTypeNames.FONTTYPE_INFO)
             Else
-'Msg963= No hay GMs Online.
-Call WriteLocaleMsg(UserIndex, "963", e_FontTypeNames.FONTTYPE_INFO)
+                'Msg963= No hay GMs Online.
+                Call WriteLocaleMsg(UserIndex, "963", e_FontTypeNames.FONTTYPE_INFO)
             End If
         End With
         Exit Sub
@@ -2047,8 +2058,8 @@ Public Sub HandleForgive(ByVal UserIndex As Integer)
 100     With UserList(UserIndex)
             'Se asegura que el target es un npc
 102         If Not IsValidNpcRef(.flags.TargetNPC) Then
-'Msg964= Primero tenés que seleccionar al sacerdote.
-Call WriteLocaleMsg(UserIndex, "964", e_FontTypeNames.FONTTYPE_INFO)
+            'Msg964= Primero tenés que seleccionar al sacerdote.
+            Call WriteLocaleMsg(UserIndex, "964", e_FontTypeNames.FONTTYPE_INFO)
                 Exit Sub
             End If
 
@@ -2060,24 +2071,24 @@ Call WriteLocaleMsg(UserIndex, "964", e_FontTypeNames.FONTTYPE_INFO)
 
             'Make sure it's close enough
 110         If Distancia(.Pos, priest.Pos) > 3 Then
-'Msg965= El sacerdote no puede escuchar tus pecados debido a que estás demasiado lejos.
-Call WriteLocaleMsg(UserIndex, "965", e_FontTypeNames.FONTTYPE_INFO)
+                'Msg965= El sacerdote no puede escuchar tus pecados debido a que estás demasiado lejos.
+                Call WriteLocaleMsg(UserIndex, "965", e_FontTypeNames.FONTTYPE_INFO)
                 Exit Sub
             End If
         
 114         If .Faccion.Status = e_Facciones.Ciudadano Or .Faccion.Status = e_Facciones.Armada Or .Faccion.Status = e_Facciones.consejo Then
-116             Call WriteChatOverHead(UserIndex, "Tu alma ya esta libre de pecados hijo mio.", priest.Char.charindex, vbWhite)
+116             Call WriteLocaleChatOverHead(UserIndex, "1342", vbNullString, priest.Char.charindex, vbWhite) ' Msg1342=Tu alma ya esta libre de pecados hijo mio.
                 Exit Sub
             End If
         
 118         If .Faccion.Status = e_Facciones.Caos Or .Faccion.Status = e_Facciones.consejo Then
-120             Call WriteChatOverHead(UserIndex, "¡¡Dios no te perdonará mientras seas fiel al Demonio!!", priest.Char.charindex, vbWhite)
+120             Call WriteLocaleChatOverHead(UserIndex, "1343", vbNullString, priest.Char.charindex, vbWhite) ' Msg1343=¡¡Dios no te perdonará mientras seas fiel al Demonio!!
                 Exit Sub
             End If
 
 122         If .GuildIndex <> 0 Then
 124             If modGuilds.Alineacion(.GuildIndex) = 1 Then
-126                 Call WriteChatOverHead(UserIndex, "Te encuentras en un clan criminal... debes retirarte para que pueda perdonarte.", priest.Char.charindex, vbWhite)
+126                 Call WriteLocaleChatOverHead(UserIndex, "1344", vbNullString, priest.Char.charindex, vbWhite) ' Msg1344=Te encuentras en un clan criminal... debes retirarte para que pueda perdonarte.
                     Exit Sub
                 End If
             End If
@@ -2085,11 +2096,11 @@ Call WriteLocaleMsg(UserIndex, "965", e_FontTypeNames.FONTTYPE_INFO)
 128         If .Faccion.ciudadanosMatados > 0 Then
                 Dim Donacion As Long
 130             Donacion = .Faccion.ciudadanosMatados * SvrConfig.GetValue("GoldMult") * SvrConfig.GetValue("CostoPerdonPorCiudadano")
-132             Call WriteChatOverHead(UserIndex, "Has matado a ciudadanos inocentes, Dios no puede perdonarte lo que has hecho. " & "Pero si haces una generosa donación de, digamos, " & PonerPuntos(Donacion) & " monedas de oro, tal vez cambie de opinión...", priest.Char.charindex, vbWhite)
+132             Call WriteLocaleChatOverHead(UserIndex, "1345", vbNullString, priest.Char.charindex, vbWhite) ' Msg1345=Has matado a ciudadanos inocentes, Dios no puede perdonarte lo que has hecho. Pero si haces una generosa donación de, digamos, ¬1 monedas de oro, tal vez cambie de opinión...
                 Exit Sub
             Else
             Donacion = SvrConfig.GetValue("CostoPerdonPorCiudadano") / 2
-                Call WriteChatOverHead(UserIndex, "Para volver a ser un ciudadano deberás Donar " & Donacion & " monedas de oro.", priest.Char.charindex, vbWhite)
+                Call WriteLocaleChatOverHead(UserIndex, 1346, Donacion, priest.Char.charindex, vbWhite)  ' Msg1346=Para volver a ser un ciudadano deberás Donar ¬1 monedas de oro.
                 Exit Sub
             End If
                         
@@ -2103,11 +2114,11 @@ Call WriteLocaleMsg(UserIndex, "965", e_FontTypeNames.FONTTYPE_INFO)
             End If
             
             If Not permitePerdon Then
-                Call WriteChatOverHead(UserIndex, "No podrás ser perdonado perteneciendo a un clan de alineación Criminal o de Alineación Oscura.", priest.Char.charindex, vbYellow)
+                Call WriteLocaleChatOverHead(UserIndex, "1347", "", priest.Char.charindex, vbYellow) ' Msg1347=No podrás ser perdonado perteneciendo a un clan de alineación Criminal o de Alineación Oscura.
                 Exit Sub
             End If
 
-134         Call WriteChatOverHead(UserIndex, "Con estas palabras, te libero de todo tipo de pecados. ¡Que Dios te acompañe hijo mío!", priest.Char.charindex, vbYellow)
+134         Call WriteLocaleChatOverHead(UserIndex, "1348", "", priest.Char.charindex, vbYellow) ' Msg1348=Con estas palabras, te libero de todo tipo de pecados. ¡Que Dios te acompañe hijo mío!
 136         Call SendData(SendTarget.ToPCAliveArea, UserIndex, PrepareMessageParticleFX(UserList(UserIndex).Char.charindex, "80", 100, False))
 138         Call SendData(SendTarget.ToPCAliveArea, UserIndex, PrepareMessagePlayWave("100", UserList(UserIndex).Pos.X, UserList(UserIndex).Pos.y))
 140         Call VolverCiudadano(UserIndex)
