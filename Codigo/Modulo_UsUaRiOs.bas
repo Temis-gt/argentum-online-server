@@ -228,7 +228,8 @@ On Error GoTo Check_ConnectUser_Err
         End If
         
         If EsGM(UserIndex) Then
-            Call SendData(SendTarget.ToAdminsYDioses, 0, PrepareMessageConsoleMsg("Servidor » " & name & " se conecto al juego.", e_FontTypeNames.FONTTYPE_INFOBOLD))
+            Call SendData(SendTarget.ToAdminsYDioses, 0, PrepareMessageLocaleMsg(1706, name, e_FontTypeNames.FONTTYPE_INFOBOLD)) 'Msg1706=Servidor » ¬1 se conecto al juego.
+
             Call LogGM(name, "Se conectó con IP: " & .ConnectionDetails.IP)
         End If
     End With
@@ -739,7 +740,7 @@ On Error GoTo Complete_ConnectUser_Err
 965         If NumUsers > DayStats.MaxUsuarios Then DayStats.MaxUsuarios = NumUsers
         
 970         If NumUsers > RecordUsuarios Then
-975             Call SendData(SendTarget.ToAll, 0, PrepareMessageConsoleMsg("Record de usuarios conectados simultáneamente: " & NumUsers & " usuarios.", e_FontTypeNames.FONTTYPE_INFO))
+975             Call SendData(SendTarget.ToAll, 0, PrepareMessageLocaleMsg("1550", e_FontTypeNames.FONTTYPE_INFO, NumUsers)) ' Msg1550=Record de usuarios conectados simultáneamente: ¬1 usuarios.
 980             RecordUsuarios = NumUsers
             End If
 
@@ -798,8 +799,8 @@ On Error GoTo Complete_ConnectUser_Err
                 Call WriteLocaleMsg(UserIndex, "522", e_FontTypeNames.FONTTYPE_GUILD, .name)
 
 
-1135        ElseIf .Stats.ELV < 14 Then
-1140            Call WriteConsoleMsg(UserIndex, "¡Bienvenido de nuevo " & .name & "! Actualmente estas en el nivel " & .Stats.ELV & " en " & get_map_name(.pos.Map) & ", ¡buen viaje y mucha suerte!", e_FontTypeNames.FONTTYPE_GUILD)
+1135        ElseIf .Stats.ELV < 25 Then
+1140            Call WriteLocaleMsg(UserIndex, "1439", e_FontTypeNames.FONTTYPE_GUILD, .name & "¬" & .Stats.ELV & "¬" & get_map_name(.pos.Map)) ' Msg1439=¡Bienvenido de nuevo ¬1! Actualmente estas en el nivel ¬2 en ¬3, ¡buen viaje y mucha suerte!
 
              End If
 
@@ -829,14 +830,11 @@ On Error GoTo Complete_ConnectUser_Err
              End If
 
 1215        If EventoActivo Then
-1220            Call WriteConsoleMsg(UserIndex, PublicidadEvento & ". Tiempo restante: " & TiempoRestanteEvento & " minuto(s).", e_FontTypeNames.FONTTYPE_New_Eventos)
+1220            Call WriteLocaleMsg(UserIndex, 1625, e_FontTypeNames.FONTTYPE_New_Eventos, PublicidadEvento & "¬" & TiempoRestanteEvento) 'Msg1625=¬1. Tiempo restante: ¬2 minuto(s).
              End If
         
 1225        Call WriteContadores(UserIndex)
 1227        Call WritePrivilegios(UserIndex)
-            If EnableTelemetry Then
-                Call WriteRequestTelemetry(UserIndex)
-            End If
             Call RestoreDCUserCache(UserIndex)
             Call CustomScenarios.UserConnected(userIndex)
             Call AntiCheat.OnNewPlayerConnect(UserIndex)
@@ -1514,7 +1512,7 @@ Public Sub SwapNpcPos(ByVal UserIndex As Integer, ByRef TargetPos As t_WorldPos,
 End Sub
 
 Function MoveUserChar(ByVal UserIndex As Integer, ByVal nHeading As e_Heading) As Boolean
-        ' 20/01/2021 - WyroX: Lo convierto a función y saco los WritePosUpdate, ahora están en el paquete
+        ' Lo convierto a función y saco los WritePosUpdate, ahora están en el paquete
 
         On Error GoTo MoveUserChar_Err
 
@@ -2008,7 +2006,7 @@ End Function
 Sub NPCAtacado(ByVal NpcIndex As Integer, ByVal UserIndex As Integer, Optional ByVal AffectsOwner As Boolean = True)
         On Error GoTo NPCAtacado_Err
         
-        ' WyroX: El usuario pierde la protección
+        '  El usuario pierde la protección
 100     UserList(UserIndex).Counters.TiempoDeInmunidad = 0
 102     UserList(UserIndex).flags.Inmunidad = 0
 
@@ -2085,13 +2083,12 @@ Sub SubirSkill(ByVal UserIndex As Integer, ByVal Skill As Integer)
 140         If Aumenta < Menor Then
 142             UserList(UserIndex).Stats.UserSkills(Skill) = UserList(UserIndex).Stats.UserSkills(Skill) + 1
     
-144             Call WriteConsoleMsg(UserIndex, "¡Has mejorado tu skill " & SkillsNames(Skill) & " en un punto!. Ahora tienes " & UserList(UserIndex).Stats.UserSkills(Skill) & " pts.", e_FontTypeNames.FONTTYPE_INFO)
+144             Call WriteLocaleMsg(UserIndex, 1626, e_FontTypeNames.FONTTYPE_INFO, SkillsNames(Skill) & "¬" & UserList(UserIndex).Stats.UserSkills(Skill)) 'Msg1626=¡Has mejorado tu habilidad ¬1 en un punto! Ahora tienes ¬2 pts.
             
                 Dim BonusExp As Long
 146             BonusExp = 5& * SvrConfig.GetValue("ExpMult")
         
-'Msg1313= ¡Has ganado ¬1 puntos de experiencia!
-Call WriteLocaleMsg(UserIndex, "1313", e_FontTypeNames.FONTTYPE_INFOIAO, BonusExp)
+                Call WriteLocaleMsg(UserIndex, "1313", e_FontTypeNames.FONTTYPE_INFOIAO, BonusExp) 'Msg1313= ¡Has ganado ¬1 puntos de experiencia!
                 
 152             If UserList(UserIndex).Stats.ELV < STAT_MAXELV Then
 154                 UserList(UserIndex).Stats.Exp = UserList(UserIndex).Stats.Exp + BonusExp
@@ -2843,7 +2840,7 @@ Sub VolverCriminal(ByVal UserIndex As Integer)
 104     If .flags.Privilegios And (e_PlayerType.user Or e_PlayerType.Consejero) Then
    
 106         If .Faccion.Status = e_Facciones.Armada Then
-                ' WyroX: NUNCA debería pasar, pero dejo un log por si las...
+                '  NUNCA debería pasar, pero dejo un log por si las...
                 Call TraceError(111, "Un personaje de la Armada Real atacó un ciudadano.", "UsUaRiOs.VolverCriminal")
                 'Call ExpulsarFaccionReal(UserIndex)
             End If

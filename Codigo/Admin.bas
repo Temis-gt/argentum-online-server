@@ -205,7 +205,7 @@ Sub WorldSave()
 
         Dim Porc  As Long
 
-100     Call SendData(SendTarget.ToAll, 0, PrepareMessageConsoleMsg("Servidor » Iniciando WorldSave", e_FontTypeNames.FONTTYPE_SERVER))
+100     Call SendData(SendTarget.ToAll, 0, PrepareMessageLocaleMsg("1732", vbNullString, e_FontTypeNames.FONTTYPE_SERVER)) 'Msg1732=Servidor » Iniciando WorldSave
 
 102     Call ReSpawnOrigPosNpcs 'respawn de los guardias en las pos originales
 
@@ -230,7 +230,7 @@ Sub WorldSave()
 
 124     FrmStat.Visible = False
 
-126     Call SendData(SendTarget.ToAll, 0, PrepareMessageConsoleMsg("Servidor » WorldSave ha concluído", e_FontTypeNames.FONTTYPE_SERVER))
+126     Call SendData(SendTarget.ToAll, 0, PrepareMessageLocaleMsg(1733, vbNullString, e_FontTypeNames.FONTTYPE_SERVER))
 
         Exit Sub
         
@@ -287,11 +287,10 @@ Public Sub Encarcelar(ByVal UserIndex As Integer, ByVal minutos As Long, Optiona
 104     Call WarpUserChar(UserIndex, Prision.Map, Prision.X, Prision.Y, True)
         
 106     If LenB(GmName) = 0 Then
-'Msg1107= Has sido encarcelado, deberas permanecer en la carcel  ¬1 minutos.
-Call WriteLocaleMsg(UserIndex, "1107", e_FontTypeNames.FONTTYPE_INFO, minutos)
+            'Msg1107= Has sido encarcelado, deberas permanecer en la carcel  ¬1 minutos.
+            Call WriteLocaleMsg(UserIndex, "1107", e_FontTypeNames.FONTTYPE_INFO, minutos)
         Else
-110         Call WriteConsoleMsg(UserIndex, GmName & " te ha encarcelado, deberas permanecer en la carcel " & minutos & " minutos.", e_FontTypeNames.FONTTYPE_INFO)
-
+110         Call WriteLocaleMsg(UserIndex, 1617, e_FontTypeNames.FONTTYPE_INFO, GmName & "¬" & minutos) 'Msg1617=¬1 te ha encarcelado, deberás permanecer en la cárcel ¬2 minutos.
         End If
         
         
@@ -393,8 +392,7 @@ Public Sub BanTemporal(ByVal nombre As String, ByVal dias As Integer, Causa As S
 
 110     Call Baneos.Add(tBan)
 112     Call SaveBan(Baneos.Count)
-114     Call SendData(SendTarget.ToAdminsYDioses, 0, PrepareMessageConsoleMsg("Servidor » " & nombre & " fue baneado por " & Causa & " durante los próximos " & dias & " días. La medida fue tomada por: " & Baneador, e_FontTypeNames.FONTTYPE_SERVER))
-
+114     Call SendData(SendTarget.ToAdminsYDioses, 0, PrepareMessageLocaleMsg(1705, nombre & "¬" & Causa & "¬" & dias & "¬" & Baneador, e_FontTypeNames.FONTTYPE_SERVER)) 'Msg1705=¬1 fue baneado por ¬2 durante los próximos ¬3 días. La medida fue tomada por: ¬4.
         
         Exit Sub
 

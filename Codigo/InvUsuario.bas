@@ -771,7 +771,7 @@ Sub PickObj(ByVal UserIndex As Integer)
 124                 If BusquedaTesoroActiva Then
 126                     If UserList(UserIndex).Pos.Map = TesoroNumMapa And UserList(UserIndex).Pos.X = TesoroX And UserList(UserIndex).Pos.Y = TesoroY Then
     
-128                         Call SendData(SendTarget.ToAll, 0, PrepareMessageConsoleMsg("Eventos> " & UserList(UserIndex).name & " encontro el tesoro ¡Felicitaciones!", e_FontTypeNames.FONTTYPE_TALK))
+128                         Call SendData(SendTarget.ToAll, 0, PrepareMessageLocaleMsg(1639, UserList(UserIndex).name, e_FontTypeNames.FONTTYPE_TALK)) 'Msg1640=Eventos> ¬1 encontró el tesoro ¡Felicitaciones!
 130                         BusquedaTesoroActiva = False
 
                         End If
@@ -780,7 +780,7 @@ Sub PickObj(ByVal UserIndex As Integer)
                 
 132                 If BusquedaRegaloActiva Then
 134                     If UserList(UserIndex).Pos.Map = RegaloNumMapa And UserList(UserIndex).Pos.X = RegaloX And UserList(UserIndex).Pos.Y = RegaloY Then
-136                         Call SendData(SendTarget.ToAll, 0, PrepareMessageConsoleMsg("Eventos> " & UserList(UserIndex).name & " fue el valiente que encontro el gran item magico ¡Felicitaciones!", e_FontTypeNames.FONTTYPE_TALK))
+136                         Call SendData(SendTarget.ToAll, 0, PrepareMessageLocaleMsg(1640, UserList(UserIndex).name, e_FontTypeNames.FONTTYPE_TALK)) 'Msg1640=Eventos> ¬1 fue el valiente que encontró el gran ítem mágico ¡Felicitaciones!
 138                         BusquedaRegaloActiva = False
 
                         End If
@@ -3386,7 +3386,7 @@ Sub TirarTodosLosItems(ByVal UserIndex As Integer)
 130                     If NuevaPos.X <> 0 And NuevaPos.Y <> 0 Then
 132                         Call DropObj(UserIndex, i, MiObj.amount, NuevaPos.Map, NuevaPos.X, NuevaPos.Y)
                         
-                        ' WyroX: Si no hay lugar, quemamos el item del inventario (nada de mochilas gratis)
+                        '  Si no hay lugar, quemamos el item del inventario (nada de mochilas gratis)
                         Else
 134                         Call QuitarUserInvItem(UserIndex, i, MiObj.amount)
 136                         Call UpdateUserInv(False, UserIndex, i)

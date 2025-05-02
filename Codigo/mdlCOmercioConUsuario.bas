@@ -65,7 +65,8 @@ Public Function IniciarComercioConUsuario(ByVal Origen As Integer, ByVal Destino
 128         Call SetUserRef(UserList(Destino).flags.targetUser, Origen)
     
 130         UserList(Destino).flags.pregunta = 4
-132         Call WritePreguntaBox(Destino, UserList(Origen).Name & " desea comerciar contigo. ¿Aceptás?")
+132         Call WritePreguntaBox(Destino, 1594, UserList(Origen).name) 'Msg1594= ¬1 desea comerciar contigo. ¿Aceptás?
+
     
         End If
 
@@ -234,13 +235,17 @@ Public Sub AceptarComercioUsu(ByVal UserIndex As Integer)
 120     UserList(UserIndex).ComUsu.Acepto = True
 
 122     If UserList(OtroUserIndex).ComUsu.Acepto = False Then
-124         Call WriteConsoleMsg(UserIndex, "El otro usuario aun no ha aceptado tu oferta.", e_FontTypeNames.FONTTYPE_TALK)
+124         'Call WriteConsoleMsg(UserIndex, "El otro usuario aun no ha aceptado tu oferta.", e_FontTypeNames.FONTTYPE_TALK)
+            Call WriteLocaleMsg(UserIndex, 1596, e_FontTypeNames.FONTTYPE_TALK) 'Msg1596= El otro usuario aún no ha aceptado tu oferta.
             Exit Sub
 
         End If
 
 126     If UserList(UserIndex).ComUsu.Oro > UserList(UserIndex).Stats.GLD Then
-128         Call WriteConsoleMsg(UserIndex, "No tienes esa cantidad.", e_FontTypeNames.FONTTYPE_TALK)
+128         'Call WriteConsoleMsg(UserIndex, "No tienes esa cantidad.", e_FontTypeNames.FONTTYPE_TALK)'ver ReyarB
+            Call WriteLocaleMsg(UserIndex, 1597, e_FontTypeNames.FONTTYPE_TALK) 'Msg1597= No tienes esa cantidad.
+
+
 130         TerminarAhora = True
         End If
     
@@ -254,13 +259,13 @@ Public Sub AceptarComercioUsu(ByVal UserIndex As Integer)
 138     For i = 1 To UBound(UserList(OtroUserIndex).ComUsu.itemsAenviar)
 140         objOfrecido = UserList(OtroUserIndex).ComUsu.itemsAenviar(i)
 142         If objOfrecido.ObjIndex > 0 And Not TieneObjetos(objOfrecido.ObjIndex, objOfrecido.amount, OtroUserIndex) Then
-144             Call WriteConsoleMsg(OtroUserIndex, "El otro usuario no tiene esa cantidad disponible para ofrecer.", e_FontTypeNames.FONTTYPE_INFO)
+144             Call WriteLocaleMsg(OtroUserIndex, 1599, e_FontTypeNames.FONTTYPE_INFO) 'Msg1599= El otro usuario no tiene esa cantidad disponible para ofrecer.
 146             GoTo FinalizarComercio
             End If
         
 148         objOfrecido = UserList(UserIndex).ComUsu.itemsAenviar(i)
 150         If objOfrecido.ObjIndex > 0 And Not TieneObjetos(objOfrecido.ObjIndex, objOfrecido.amount, UserIndex) Then
-152             Call WriteConsoleMsg(UserIndex, "No tienes esa cantidad disponible para ofrecer.", e_FontTypeNames.FONTTYPE_INFO)
+152             Call WriteLocaleMsg(UserIndex, 1598, e_FontTypeNames.FONTTYPE_INFO) 'Msg1598= No tienes esa cantidad disponible para ofrecer.
 154             GoTo FinalizarComercio
             End If
 156     Next i

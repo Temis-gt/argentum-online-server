@@ -407,7 +407,7 @@ On Error GoTo AddPlayerOrGroup_Err
 138                 If IsValidUserRef(.Grupo.Miembros(i)) Then
 140                     AddPlayerOrGroup = CanPlayerJoin(instance, .Grupo.Miembros(i).ArrayIndex)
 142                     If Not AddPlayerOrGroup.Success Then
-                            Call WriteConsoleMsg(UserIndex, UserList(.Grupo.Miembros(i).ArrayIndex).name & ": no puede participar, motivo: ", e_FontTypeNames.FONTTYPE_New_Verde_Oscuro)
+                            Call WriteLocaleMsg(UserIndex, 1604, UserList(.Grupo.Miembros(i).ArrayIndex).name, e_FontTypeNames.FONTTYPE_New_Verde_Oscuro) 'Msg1604= ¬1: no puede participar, motivo: 'ver ReyarB
                             Call WriteLocaleMsg(UserIndex, AddPlayerOrGroup.Message, e_FontTypeNames.FONTTYPE_INFO)
 150                         Exit Function
                         End If
@@ -603,9 +603,9 @@ Public Sub UpdateWaitingForPlayers(ByVal FrameTime As Long, ByRef Instance As t_
                         Minutes = Seconds / 60
                         Seconds = Seconds - (Minutes * 60)
                         Call SendData(SendTarget.ToIndex, Instance.Players(i).user.ArrayIndex, _
-                                      PrepareMessageConsoleMsg("Esperando jugadores, La partida iniciara en " & GetTimeString(Minutes, Seconds) & " o cuando se llene la sala", e_FontTypeNames.FONTTYPE_GUILD))
+                                    PrepareMessageLocaleMsg(1727, GetTimeString(Minutes, Seconds), e_FontTypeNames.FONTTYPE_GUILD)) 'Msg1727=Esperando jugadores, La partida iniciara en ¬1 o cuando se llene la sala
                         Call SendData(SendTarget.ToIndex, Instance.Players(i).user.ArrayIndex, _
-                                      PrepareMessageConsoleMsg("En este momento hay " & Instance.RegisteredPlayers & " / " & Instance.MaxPlayers & " y se requiere un minimo de " & Instance.MinPlayers & " para que pueda iniciar", e_FontTypeNames.FONTTYPE_GUILD))
+                                    PrepareMessageLocaleMsg(1728, instance.RegisteredPlayers & "¬" & instance.MaxPlayers & "¬" & instance.MinPlayers, e_FontTypeNames.FONTTYPE_GUILD)) 'Msg1728=En este momento hay ¬1 / ¬2 y se requiere un minimo de ¬3 para que pueda iniciar
                     End If
                 Next i
             End If
@@ -619,7 +619,8 @@ Public Sub UpdateWaitingForPlayers(ByVal FrameTime As Long, ByRef Instance As t_
             
             For i = 0 To Instance.RegisteredPlayers - 1
                 If IsValidUserRef(Instance.Players(i).user) Then
-                    Call SendData(SendTarget.ToIndex, Instance.Players(i).user.ArrayIndex, PrepareMessageConsoleMsg("Evento cancelador por falta de jugadores", e_FontTypeNames.FONTTYPE_GUILD))
+                    Call SendData(SendTarget.ToIndex, instance.Players(i).User.ArrayIndex, _
+                                PrepareMessageLocaleMsg(1729, "", e_FontTypeNames.FONTTYPE_GUILD)) 'Msg1729=Evento cancelado por falta de jugadores
                 End If
             Next i
             Call CancelLobby(Instance)
@@ -786,14 +787,14 @@ End Function
 
 Public Sub StartLobby(ByRef instance As t_Lobby, ByVal UserIndex As Integer)
     If Instance.State = Initialized And UserIndex >= 0 Then
-        Call WriteConsoleMsg(UserIndex, "El evento ya fue iniciado.", e_FontTypeNames.FONTTYPE_INFO)
+        Call WriteLocaleMsg(UserIndex, 1605, e_FontTypeNames.FONTTYPE_INFO) 'Msg1605= El evento ya fue iniciado.
         Exit Sub
     End If
     If (Instance.TeamSize > 1 Or Instance.TeamType = eFixedTeamCount) And Instance.TeamType = eRandom Then
         Call SortTeams(instance)
     End If
     Call ModLobby.UpdateLobbyState(instance, e_LobbyState.InProgress)
-    If UserIndex >= 0 Then Call WriteConsoleMsg(UserIndex, "Evento iniciado", e_FontTypeNames.FONTTYPE_INFO)
+    If UserIndex >= 0 Then Call WriteLocaleMsg(UserIndex, 1606, e_FontTypeNames.FONTTYPE_INFO) 'Msg1606= Evento iniciado
 End Sub
 
 Public Function HandleRemoteLobbyCommand(ByVal Command, ByVal Params As String, ByVal UserIndex As Integer, ByVal LobbyIndex As Integer) As Boolean
@@ -987,17 +988,18 @@ End Function
 
 Public Function ValidateLobbySettings(ByVal UserIndex As Integer, ByRef LobbySettings As t_NewScenearioSettings)
     If LobbySettings.MaxPlayers > NumUsers Then
-        Call WriteConsoleMsg(UserIndex, "Hay pocos jugadores en el servidor, intenta con una cantidad menor de participantes.", e_FontTypeNames.FONTTYPE_INFO)
+        Call WriteLocaleMsg(UserIndex, 1607, e_FontTypeNames.FONTTYPE_INFO) 'Msg1607= Hay pocos jugadores en el servidor, intenta con una cantidad menor de participantes.
+
         Exit Function
     End If
     
     If LobbySettings.MinLevel < 1 Or LobbySettings.MaxLevel > 47 Then
-        Call WriteConsoleMsg(UserIndex, "El nivel para el evento debe ser entre 1 y 47.", e_FontTypeNames.FONTTYPE_INFO)
+        Call WriteLocaleMsg(UserIndex, 1608, e_FontTypeNames.FONTTYPE_INFO) 'Msg1608= El nivel para el evento debe ser entre 1 y 47.
         Exit Function
     End If
     
     If LobbySettings.MinLevel > LobbySettings.MaxLevel Then
-        Call WriteConsoleMsg(UserIndex, "El nivel minimo debe ser menor al maximo.", e_FontTypeNames.FONTTYPE_INFO)
+        Call WriteLocaleMsg(UserIndex, 1609, e_FontTypeNames.FONTTYPE_INFO) 'Msg1609= El nivel mínimo debe ser menor al máximo.
         Exit Function
     End If
     ValidateLobbySettings = True
@@ -1008,7 +1010,7 @@ Public Sub CreatePublicEvent(ByVal UserIndex As Integer, ByRef LobbySettings As 
     
     LobbyId = GetAvailableLobby()
     If LobbyId < 0 Then
-        Call WriteConsoleMsg(UserIndex, "No se pudo encontrar una sala disponible.", e_FontTypeNames.FONTTYPE_INFO)
+        Call WriteLocaleMsg(UserIndex, 1610, e_FontTypeNames.FONTTYPE_INFO) 'Msg1610= No se pudo encontrar una sala disponible.
         Exit Sub
     End If
     If Not ValidateLobbySettings(UserIndex, LobbySettings) Then
@@ -1022,6 +1024,6 @@ Public Sub CreatePublicEvent(ByVal UserIndex As Integer, ByRef LobbySettings As 
     addPlayerResult = ModLobby.AddPlayerOrGroup(LobbyList(LobbyId), UserIndex, LobbySettings.Password)
     If Not addPlayerResult.Success Then
         Call CancelLobby(LobbyList(LobbyId))
-        Call WriteConsoleMsg(UserIndex, "Se cancelo la sala que creaste porque no cumples los requisitos para participar.", e_FontTypeNames.FONTTYPE_INFO)
+        Call WriteLocaleMsg(UserIndex, 1611, e_FontTypeNames.FONTTYPE_INFO) 'Msg1611= Se canceló la sala que creaste porque no cumples los requisitos para participar.
     End If
 End Sub

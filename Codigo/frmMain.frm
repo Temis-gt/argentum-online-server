@@ -850,7 +850,7 @@ Private Sub CerrarYForzarActualizar_Click()
 
 100     If MsgBox("¿Está seguro que desea guardar, forzar actualización a los usuarios y cerrar?", vbYesNo, "Confirmación") = vbNo Then Exit Sub
         
-102     Call SendData(SendTarget.ToAll, 0, PrepareMessageConsoleMsg("Servidor » Cerrando servidor y lanzando nuevo parche.", e_FontTypeNames.FONTTYPE_PROMEDIO_MENOR))
+102     Call SendData(SendTarget.ToAll, 0, PrepareMessageLocaleMsg(1659, vbNullString, e_FontTypeNames.FONTTYPE_PROMEDIO_MENOR)) 'Msg1659=Servidor » Cerrando servidor y lanzando nuevo parche.
 
 104     Call ForzarActualizar
 106     Call GuardarUsuarios
@@ -965,7 +965,7 @@ Private Sub tControlHechizos_Timer()
         
 End Sub
 
-' WyroX: Comprobamos cada 10 segundos, porque no es necesaria tanta precisión
+'  Comprobamos cada 10 segundos, porque no es necesaria tanta precisión
 Private Sub TiempoRetos_Timer()
 
 On Error GoTo Handler
@@ -1441,8 +1441,7 @@ Private Sub Command2_Click()
         
         On Error GoTo Command2_Click_Err
         
-100     Call SendData(SendTarget.ToAll, 0, PrepareMessageConsoleMsg("Servidor » " & BroadMsg.Text, e_FontTypeNames.FONTTYPE_SERVER))
-
+100     Call SendData(SendTarget.ToAll, 0, PrepareMessageLocaleMsg(1660, BroadMsg.Text, e_FontTypeNames.FONTTYPE_SERVER)) 'Msg1660=Servidor » ¬1
         
         Exit Sub
 
@@ -1458,7 +1457,7 @@ Private Sub Command4_Click()
 
 100     If MsgBox("¿Está seguro que desea guardar y cerrar?", vbYesNo, "Confirmación") = vbNo Then Exit Sub
         
-102     Call SendData(SendTarget.ToAll, 0, PrepareMessageConsoleMsg("Servidor » Cerrando servidor.", e_FontTypeNames.FONTTYPE_PROMEDIO_MENOR))
+102     Call SendData(SendTarget.ToAll, 0, PrepareMessageLocaleMsg(1661, vbNullString, e_FontTypeNames.FONTTYPE_PROMEDIO_MENOR)) 'Msg1661=Servidor » Cerrando servidor.
 
 104     Call GuardarUsuarios
 106     Call EcharPjsNoPrivilegiados
@@ -1548,7 +1547,7 @@ Private Sub EstadoTimer_Timer()
     Call PerformanceTestStart(PerformanceTimer)
     For i = 1 To Baneos.Count
         If Baneos(i).FechaLiberacion <= Now Then
-            Call SendData(SendTarget.ToAdmins, 0, PrepareMessageConsoleMsg("Servidor » Se ha concluido la sentencia de ban para " & Baneos(i).Name & ".", e_FontTypeNames.FONTTYPE_SERVER))
+            Call SendData(SendTarget.ToAdmins, 0, PrepareMessageConsoleMsg("Servidor » Se ha concluido la sentencia de ban para " & Baneos(i).name & ".", e_FontTypeNames.FONTTYPE_SERVER))
             Call UnBan(Baneos(i).Name)
             Call Baneos.Remove(i)
             Call SaveBans
@@ -1900,7 +1899,7 @@ Private Sub SubastaTimer_Timer()
     Call PerformanceTestStart(PerformanceTimer)
     'Si ya paso un minuto y todavia no hubo oferta, avisamos que se cancela en un minuto
     If Subasta.TiempoRestanteSubasta = 240 And Subasta.HuboOferta = False Then
-        Call SendData(SendTarget.ToAll, 0, PrepareMessageConsoleMsg("¡Quedan 4 minuto(s) para finalizar la subasta! Escribe /SUBASTA para mas información. La subasta será cancelada si no hay ofertas en el próximo minuto.", e_FontTypeNames.FONTTYPE_SUBASTA))
+        Call SendData(SendTarget.ToAll, 0, PrepareMessageLocaleMsg(1662, vbNullString, e_FontTypeNames.FONTTYPE_SUBASTA)) 'Msg1662=¡Quedan 4 minuto(s) para finalizar la subasta! Escribe /SUBASTA para mas información. La subasta será cancelada si no hay ofertas en el próximo minuto.
         Subasta.MinutosDeSubasta = 4
         Subasta.PosibleCancelo = True
     End If
@@ -1908,7 +1907,7 @@ Private Sub SubastaTimer_Timer()
     'Si ya pasaron dos minutos y no hubo ofertas, cancelamos la subasta
     If Subasta.TiempoRestanteSubasta = 180 And Subasta.HuboOferta = False Then
         Subasta.HaySubastaActiva = False
-        Call SendData(SendTarget.ToAll, 0, PrepareMessageConsoleMsg("Subasta cancelada por falta de ofertas.", e_FontTypeNames.FONTTYPE_SUBASTA))
+        Call SendData(SendTarget.ToAll, 0, PrepareMessageLocaleMsg(1663, vbNullString, e_FontTypeNames.FONTTYPE_SUBASTA)) 'Msg1663=Subasta cancelada por falta de ofertas.
         'Devolver item antes de resetear datos
         Call DevolverItem
         Exit Sub
@@ -1920,28 +1919,29 @@ Private Sub SubastaTimer_Timer()
     
     If Subasta.TiempoRestanteSubasta > 0 And Subasta.PosibleCancelo = False Then
         If Subasta.TiempoRestanteSubasta = 240 Then
-            Call SendData(SendTarget.ToAll, 0, PrepareMessageConsoleMsg("¡Quedan 4 minuto(s) para finalizar la subasta! Escribe /SUBASTA para mas información.", e_FontTypeNames.FONTTYPE_SUBASTA))
+            Call SendData(SendTarget.ToAll, 0, PrepareMessageLocaleMsg(1664, vbNullString, e_FontTypeNames.FONTTYPE_SUBASTA)) 'Msg1664=¡Quedan 4 minuto(s) para finalizar la subasta! Escribe /SUBASTA para mas información.
             Subasta.MinutosDeSubasta = "4"
         End If
         If Subasta.TiempoRestanteSubasta = 180 Then
-            Call SendData(SendTarget.ToAll, 0, PrepareMessageConsoleMsg("¡Quedan 3 minuto(s) para finalizar la subasta! Escribe /SUBASTA para mas información.", e_FontTypeNames.FONTTYPE_SUBASTA))
+            Call SendData(SendTarget.ToAll, 0, PrepareMessageLocaleMsg(1665, vbNullString, e_FontTypeNames.FONTTYPE_SUBASTA)) 'Msg1665=¡Quedan 3 minuto(s) para finalizar la subasta! Escribe /SUBASTA para mas información.
             Subasta.MinutosDeSubasta = "3"
         End If
 
         If Subasta.TiempoRestanteSubasta = 120 Then
-            Call SendData(SendTarget.ToAll, 0, PrepareMessageConsoleMsg("¡Quedan 2 minuto(s) para finalizar la subasta! Escribe /SUBASTA para mas información.", e_FontTypeNames.FONTTYPE_SUBASTA))
+            Call SendData(SendTarget.ToAll, 0, PrepareMessageLocaleMsg(1666, vbNullString, e_FontTypeNames.FONTTYPE_SUBASTA)) 'Msg1666=¡Quedan 2 minuto(s) para finalizar la subasta! Escribe /SUBASTA para mas información.
             Subasta.MinutosDeSubasta = "2"
         End If
 
         If Subasta.TiempoRestanteSubasta = 60 Then
             Subasta.MinutosDeSubasta = "1"
-            Call SendData(SendTarget.ToAll, 0, PrepareMessageConsoleMsg("¡Quedan 1 minuto(s) para finalizar la subasta! Escribe /SUBASTA para mas información.", e_FontTypeNames.FONTTYPE_SUBASTA))
+            Call SendData(SendTarget.ToAll, 0, PrepareMessageLocaleMsg(1667, vbNullString, e_FontTypeNames.FONTTYPE_SUBASTA)) 'Msg1667=¡Quedan 1 minuto(s) para finalizar la subasta! Escribe /SUBASTA para mas información.
         End If
         Subasta.TiempoRestanteSubasta = Subasta.TiempoRestanteSubasta - 1
     End If
     
     If Subasta.TiempoRestanteSubasta = 1 Then
-        Call SendData(SendTarget.ToAll, 0, PrepareMessageConsoleMsg("¡La subasta a terminado! El ganador fue: " & Subasta.Comprador, e_FontTypeNames.FONTTYPE_SUBASTA))
+        Call SendData(SendTarget.ToAll, 0, PrepareMessageLocaleMsg(1668, Subasta.Comprador, e_FontTypeNames.FONTTYPE_SUBASTA)) 'Msg1668=¡La subasta ha terminado! El ganador fue: ¬1
+
         Call FinalizarSubasta
     End If
     Call PerformTimeLimitCheck(PerformanceTimer, "SubastaTimer_Timer")
@@ -1995,7 +1995,7 @@ ErrorHandler:
 End Sub
 
 Private Sub TimerMeteorologia_Timer()
-    'Call SendData(SendTarget.ToAll, 0, PrepareMessageConsoleMsg("Servidor > Timer de lluvia en :" & TimerMeteorologico, e_FontTypeNames.FONTTYPE_SERVER))
+    'Call SendData(SendTarget.ToAll, 0, PrepareMessageLocaleMsg(1741, TimerMeteorologico, e_FontTypeNames.FONTTYPE_SERVER)) 'Msg1741=Servidor > Timer de lluvia en : ¬1
         
     On Error GoTo TimerMeteorologia_Timer_Err
         
@@ -2132,7 +2132,7 @@ Private Sub tPiqueteC_Timer()
         If UserList(i).flags.UserLogged Then
             If MapData(UserList(i).Pos.Map, UserList(i).Pos.X, UserList(i).Pos.Y).trigger = e_Trigger.ANTIPIQUETE Then
                 UserList(i).Counters.PiqueteC = UserList(i).Counters.PiqueteC + 1
-                'WyroX: Le empiezo a avisar a partir de los 18 segundos, para no spamear
+                ' Le empiezo a avisar a partir de los 18 segundos, para no spamear
                 If UserList(i).Counters.PiqueteC > 3 Then
                     Call WriteLocaleMsg(i, "70", e_FontTypeNames.FONTTYPE_INFO)
                 End If
@@ -2140,7 +2140,7 @@ Private Sub tPiqueteC_Timer()
                 If UserList(i).Counters.PiqueteC > 10 Then
                     UserList(i).Counters.PiqueteC = 0
                     'Call Encarcelar(i, TIEMPO_CARCEL_PIQUETE)
-                    'WyroX: En vez de encarcelarlo, lo sacamos del juego.
+                    ' En vez de encarcelarlo, lo sacamos del juego.
                     'Ojo! No sï¿½ si se puede abusar de esto para evitar los 10 segundos al salir
                     Call WriteDisconnect(i)
                     Call CloseSocket(i)

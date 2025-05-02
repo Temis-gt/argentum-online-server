@@ -118,7 +118,7 @@ Public Sub CrearReto(ByVal UserIndex As Integer, JugadoresStr As String, ByVal A
         
 130         If PocionesMaximas >= 0 Then
 132             If TieneObjetos(38, PocionesMaximas + 1, UserIndex) Then
-134                 Call WriteConsoleMsg(UserIndex, "Tienes demasiadas pociones rojas (Cantidad máxima: " & PocionesMaximas & ").", e_FontTypeNames.FONTTYPE_INFO)
+134                 Call WriteLocaleMsg(UserIndex, "1443", e_FontTypeNames.FONTTYPE_INFO, PocionesMaximas) ' Msg1443=Tienes demasiadas pociones rojas (Cantidad máxima: ¬1).
                     Exit Sub
                 End If
             End If
@@ -137,19 +137,20 @@ Public Sub CrearReto(ByVal UserIndex As Integer, JugadoresStr As String, ByVal A
 148             For i = 0 To UBound(.Jugadores)
 150                 With .Jugadores(i)
 152                     If EsGmChar(Jugadores(i)) Then
-154                         Call WriteConsoleMsg(UserIndex, "¡No puedes jugar retos con administradores!", e_FontTypeNames.FONTTYPE_INFO)
+154                         Call WriteLocaleMsg(UserIndex, "1444", e_FontTypeNames.FONTTYPE_INFO) ' Msg1444=¡No puedes jugar retos con administradores!
                             Exit Sub
                         End If
 
 156                     tIndex = NameIndex(Jugadores(i))
                                                                                 
 158                     If Not IsValidUserRef(tIndex) Then
-160                         Call WriteConsoleMsg(UserIndex, "El usuario " & Jugadores(i) & " no puede jugar un reto en este momento.", e_FontTypeNames.FONTTYPE_INFO)
+160                         Call WriteLocaleMsg(UserIndex, "1445", e_FontTypeNames.FONTTYPE_INFO, Jugadores(i)) ' Msg1445=El usuario ¬1 no puede jugar un reto en este momento.
+
                             Exit Sub
                         End If
                     
 162                     If Not PuedeReto(tIndex.ArrayIndex) Then
-164                         Call WriteConsoleMsg(UserIndex, "El usuario " & UserList(tIndex.ArrayIndex).name & " no puede jugar un reto en este momento.", e_FontTypeNames.FONTTYPE_INFO)
+164                         Call WriteLocaleMsg(UserIndex, "1445", e_FontTypeNames.FONTTYPE_INFO, UserList(tIndex.ArrayIndex).name) ' Msg1445=El usuario ¬1 no puede jugar un reto en este momento.
                             Exit Sub
                         End If
 
@@ -189,9 +190,9 @@ Public Sub CrearReto(ByVal UserIndex As Integer, JugadoresStr As String, ByVal A
 202             .estado = e_SolicitudRetoEstado.Enviada
             End With
 
-204         Call WriteConsoleMsg(UserIndex, "Has enviado una solicitud para el siguiente reto:", e_FontTypeNames.FONTTYPE_INFO)
+204         Call WriteLocaleMsg(UserIndex, "1446", e_FontTypeNames.FONTTYPE_INFO) ' Msg1446=Has enviado una solicitud para el siguiente reto:
 206         Call WriteConsoleMsg(UserIndex, Texto2, e_FontTypeNames.FONTTYPE_New_Naranja)
-208         Call WriteConsoleMsg(UserIndex, "Escribe /CANCELAR para anular la solicitud.", e_FontTypeNames.FONTTYPE_New_Gris)
+208         Call WriteLocaleMsg(UserIndex, "1447", e_FontTypeNames.FONTTYPE_New_Gris) ' Msg1447=Escribe /CANCELAR para anular la solicitud.
     
         End With
     
@@ -678,7 +679,8 @@ Public Sub FinalizarReto(ByVal Sala As Integer, Optional ByVal TiempoAgotado As 
                 Next
             
                 ' Anuncio global
-164             Call SendData(SendTarget.ToAll, 0, PrepareMessageConsoleMsg("Retos » " & Equipo1 & " vs " & Equipo2 & ". Ninguno pudo vencer a su rival.", e_FontTypeNames.FONTTYPE_INFO))
+164             Call SendData(SendTarget.ToAll, 0, PrepareMessageLocaleMsg(1670, Equipo1 & "¬" & Equipo2, e_FontTypeNames.FONTTYPE_INFO)) 'Msg1670=Retos » ¬1 vs ¬2. Ninguno pudo vencer a su rival.
+
 166             Call SalaLiberada(Sala)
             ' Hubo un ganador
             Else
@@ -757,10 +759,10 @@ Public Sub FinalizarReto(ByVal Sala As Integer, Optional ByVal TiempoAgotado As 
 
                 ' Anuncio global
 246             If UBound(.Jugadores) > 1 Then
-248                 Call SendData(SendTarget.ToAll, 0, PrepareMessageConsoleMsg("Retos » El equipo " & equipoGanador & " venció al equipo " & equipoPerdedor & " y se quedo con el botín de: " & PonerPuntos(.Apuesta) & " monedas de oro. ", e_FontTypeNames.FONTTYPE_INFO))
+248                 Call SendData(SendTarget.ToAll, 0, PrepareMessageLocaleMsg(1671, equipoGanador & "¬" & equipoPerdedor & "¬" & PonerPuntos(.Apuesta), e_FontTypeNames.FONTTYPE_INFO)) 'Msg1671=Retos » El equipo ¬1 venció al equipo ¬2 y se quedó con el botín de: ¬3 monedas de oro.
         
                 Else ' 1 vs 1
-250                 Call SendData(SendTarget.ToAll, 0, PrepareMessageConsoleMsg("Retos » " & equipoGanador & " venció a " & equipoPerdedor & " y se quedo con el botín de: " & PonerPuntos(.Apuesta) & " monedas de oro. ", e_FontTypeNames.FONTTYPE_INFO))
+250                 Call SendData(SendTarget.ToAll, 0, PrepareMessageLocaleMsg(1672, equipoGanador & "¬" & equipoPerdedor & "¬" & PonerPuntos(.Apuesta), e_FontTypeNames.FONTTYPE_INFO)) 'Msg1672=Retos » ¬1 venció a ¬2 y se quedó con el botín de: ¬3 monedas de oro.
 
                 End If
             
@@ -787,18 +789,18 @@ Public Sub FinalizarReto(ByVal Sala As Integer, Optional ByVal TiempoAgotado As 
                   End If
 
                   If eloDiff > 0 Then
-                    Call SendData(SendTarget.ToIndex, tUser.ArrayIndex, PrepareMessageConsoleMsg("Has ganado " & Abs(eloDiff) & " puntos de ELO!", e_FontTypeNames.FONTTYPE_ROSA))
+                    Call SendData(SendTarget.ToIndex, tUser.ArrayIndex, PrepareMessageLocaleMsg(1695, Abs(eloDiff), e_FontTypeNames.FONTTYPE_ROSA)) 'Msg1695=Has ganado ¬1 puntos de ELO!
                   Else
 272                 If UserList(tUser.ArrayIndex).Stats.ELO < Abs(eloDiff) Then
 274                   eloDiff = -UserList(tUser.ArrayIndex).Stats.ELO
                     End If
 
-                    Call SendData(SendTarget.ToIndex, tUser.ArrayIndex, PrepareMessageConsoleMsg("Has perdido " & Abs(eloDiff) & " puntos de ELO!", e_FontTypeNames.FONTTYPE_ROSA))
+                    Call SendData(SendTarget.ToIndex, tUser.ArrayIndex, PrepareMessageLocaleMsg(1696, Abs(eloDiff), e_FontTypeNames.FONTTYPE_ROSA)) 'Msg1696=Has perdido ¬1 puntos de ELO!
                   End If
 
 276               UserList(tUser.ArrayIndex).Stats.ELO = UserList(tUser.ArrayIndex).Stats.ELO + eloDiff
                 Else ' Alguno es menor a level 35
-                  Call SendData(SendTarget.ToIndex, tUser.ArrayIndex, PrepareMessageConsoleMsg("Al menos un participante del reto tiene nivel menor a 35, tu ELO permanece igual.", e_FontTypeNames.FONTTYPE_INFOIAO))
+                  Call SendData(SendTarget.ToIndex, tUser.ArrayIndex, PrepareMessageLocaleMsg(1697, vbNullString, e_FontTypeNames.FONTTYPE_INFOIAO)) 'Msg1697=Al menos un participante del reto tiene nivel menor a 35, tu ELO permanece igual.
                 End If
               End If
 
@@ -840,7 +842,7 @@ Public Sub TirarItemsEnPos(ByVal UserIndex As Integer, ByVal X As Byte, ByVal Y 
 126                     If NuevaPos.X <> 0 And NuevaPos.Y <> 0 Then
 128                         Call DropObj(UserIndex, i, MiObj.amount, NuevaPos.Map, NuevaPos.X, NuevaPos.Y)
                         
-                        ' WyroX: Si no hay lugar, quemamos el item del inventario (nada de mochilas gratis)
+                        '  Si no hay lugar, quemamos el item del inventario (nada de mochilas gratis)
                         Else
 130                         Call QuitarUserInvItem(UserIndex, i, MiObj.amount)
 132                         Call UpdateUserInv(False, UserIndex, i)

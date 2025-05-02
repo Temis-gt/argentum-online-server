@@ -321,8 +321,8 @@ Private Function CheckMapRestrictions(ByVal UserIndex As Integer, ByVal Map As I
 
 138         If MapInfo(Map).MinLevel <> 0 And .Stats.ELV < MapInfo(Map).MinLevel Then
 140             If .flags.UltimoMensaje <> 105 Then
-'Msg1108= Necesitas ser al menos nivel ¬1
-Call WriteLocaleMsg(UserIndex, "1108", e_FontTypeNames.FONTTYPE_INFO, MapInfo(Map).MinLevel)
+                    'Msg1108= Necesitas ser al menos nivel ¬1
+                    Call WriteLocaleMsg(UserIndex, "1108", e_FontTypeNames.FONTTYPE_INFO, MapInfo(Map).MinLevel)
 144                 .flags.UltimoMensaje = 105
                 End If
                 Exit Function
@@ -330,8 +330,8 @@ Call WriteLocaleMsg(UserIndex, "1108", e_FontTypeNames.FONTTYPE_INFO, MapInfo(Ma
 
 146         If MapInfo(Map).MaxLevel <> 0 And .Stats.ELV >= MapInfo(Map).MaxLevel Then
 148             If .flags.UltimoMensaje <> 106 Then
-'Msg1109= Sólo los personajes inferiores a nivel ¬1
-Call WriteLocaleMsg(UserIndex, "1109", e_FontTypeNames.FONTTYPE_INFO, MapInfo(Map).MaxLevel)
+                    'Msg1109= Sólo los personajes inferiores a nivel ¬1
+                    Call WriteLocaleMsg(UserIndex, "1109", e_FontTypeNames.FONTTYPE_INFO, MapInfo(Map).MaxLevel)
 152                 .flags.UltimoMensaje = 106
                 End If
                 Exit Function
@@ -439,7 +439,7 @@ Public Sub DoTileEvents(ByVal UserIndex As Integer, ByVal Map As Integer, ByVal 
     
 136             If (MapData(map, X, y).TileExit.map > 0) And (MapData(map, X, y).TileExit.map <= NumMaps) Then
     
-                    ' WyroX: Restricciones de mapas
+                    '  Restricciones de mapas
 138                 If CheckMapRestrictions(UserIndex, MapData(map, X, y).TileExit.map) Then
 140                     If EsMapaInterdimensional(MapData(map, X, y).TileExit.map) And Not EsMapaInterdimensional(.pos.map) Then
 142                         .flags.ReturnPos = .pos
@@ -1301,16 +1301,15 @@ Sub LookatTile(ByVal UserIndex As Integer, ByVal Map As Integer, ByVal X As Inte
 
 164                 If ObjData(UserList(UserIndex).flags.TargetObj).OBJType = e_OBJType.otYacimiento Then
 166                     Call ActualizarRecurso(Map, UserList(UserIndex).flags.TargetObjX, UserList(UserIndex).flags.TargetObjY)
-168                     Call WriteConsoleMsg(UserIndex, ObjData(UserList(UserIndex).flags.TargetObj).Name & " - (Minerales disponibles: " & MapData(Map, UserList(UserIndex).flags.TargetObjX, UserList(UserIndex).flags.TargetObjY).ObjInfo.amount & ")", e_FontTypeNames.FONTTYPE_INFO)
+168                     Call WriteLocaleMsg(UserIndex, 1618, e_FontTypeNames.FONTTYPE_INFO, ObjData(UserList(UserIndex).flags.TargetObj).name & "¬" & (MapData(Map, UserList(UserIndex).flags.TargetObjX, UserList(UserIndex).flags.TargetObjY).ObjInfo.amount))   'Msg1618=¬1 - (Minerales disponibles: ¬2)
 
 170                 ElseIf ObjData(UserList(UserIndex).flags.TargetObj).OBJType = e_OBJType.otArboles Then
 172                     Call ActualizarRecurso(Map, UserList(UserIndex).flags.TargetObjX, UserList(UserIndex).flags.TargetObjY)
-174                     Call WriteConsoleMsg(UserIndex, ObjData(UserList(UserIndex).flags.TargetObj).Name & " - (Recursos disponibles: " & MapData(Map, UserList(UserIndex).flags.TargetObjX, UserList(UserIndex).flags.TargetObjY).ObjInfo.amount & ")", e_FontTypeNames.FONTTYPE_INFO)
-                    
+174                     Call WriteLocaleMsg(UserIndex, 1619, e_FontTypeNames.FONTTYPE_INFO, ObjData(UserList(UserIndex).flags.TargetObj).name & "¬" & (MapData(Map, UserList(UserIndex).flags.TargetObjX, UserList(UserIndex).flags.TargetObjY).ObjInfo.amount)) 'Msg1619=¬1 - (Recursos disponibles: ¬2)
 176                 ElseIf ObjData(UserList(UserIndex).flags.TargetObj).OBJType = e_OBJType.otTeleport Then
 178                     If MapData(Map, X, Y).TileExit.Map > 0 Then
 180                         If LenB(MapInfo(MapData(Map, X, Y).TileExit.Map).map_name) <> 0 Then
-182                             Call WriteConsoleMsg(UserIndex, "Portal a " & MapInfo(MapData(Map, X, Y).TileExit.Map).map_name, e_FontTypeNames.FONTTYPE_INFO)
+182                             Call WriteLocaleMsg(UserIndex, 1620, e_FontTypeNames.FONTTYPE_INFO, MapInfo(MapData(Map, x, y).TileExit.Map).map_name) 'Msg1620=Portal a ¬1
                             Else
 184                             'Msg492=Portal a un mapa desconocido...
                                 Call WriteLocaleMsg(UserIndex, "492", e_FontTypeNames.FONTTYPE_INFO)
@@ -1618,7 +1617,7 @@ Sub LookatTile(ByVal UserIndex As Integer, ByVal Map As Integer, ByVal X As Inte
                 'End If
             
 458             If Len(NpcList(TempCharIndex).Desc) > 1 Then
-                    ' WyroX: Hacemos que se detenga a hablar un momento :P
+                    '  Hacemos que se detenga a hablar un momento :P
 460                 If NpcList(TempCharIndex).Movement = Caminata Then
 462                     NpcList(TempCharIndex).Contadores.IntervaloMovimiento = GetTickCount + 5000 + Len(NpcList(TempCharIndex).Desc) * 50 - NpcList(TempCharIndex).IntervaloMovimiento ' 5 segundos + 1 segundo cada 20 caracteres
                     End If
@@ -1644,11 +1643,11 @@ Sub LookatTile(ByVal UserIndex As Integer, ByVal Map As Integer, ByVal X As Inte
                     End If
 470             ElseIf IsValidUserRef(NpcList(TempCharIndex).MaestroUser) Then
                     If UserList(UserIndex).flags.Muerto = 0 Then
-472                     Call WriteConsoleMsg(userIndex, "NPCNAME*" & NpcList(TempCharIndex).Numero & "* es mascota de " & UserList(NpcList(TempCharIndex).MaestroUser.ArrayIndex).name & " " & estatus, e_FontTypeNames.FONTTYPE_INFO)
+472                     Call WriteLocaleMsg(UserIndex, 1621, e_FontTypeNames.FONTTYPE_INFO, NpcList(TempCharIndex).Numero & "¬" & UserList(NpcList(TempCharIndex).MaestroUser.ArrayIndex).name & "¬" & estatus) 'Msg1621=NPC ¬1 es mascota de ¬2 ¬3
                     End If
                 Else
                     If UserList(UserIndex).flags.Muerto = 0 Then
-                        Call WriteConsoleMsg(UserIndex, "NPCNAME*" & NpcList(TempCharIndex).Numero & "*" & " " & estatus, e_FontTypeNames.FONTTYPE_INFO)
+                        Call WriteLocaleMsg(UserIndex, 1622, e_FontTypeNames.FONTTYPE_INFO, NpcList(TempCharIndex).Numero & "¬" & estatus) 'Msg1622=NPC ¬1 ¬2
                     End If
                 End If
                ' End If
@@ -1717,9 +1716,8 @@ Sub LookatTile(ByVal UserIndex As Integer, ByVal Map As Integer, ByVal X As Inte
 534             UserList(UserIndex).flags.TargetObjMap = 0
 536             UserList(UserIndex).flags.TargetObjX = 0
 538             UserList(UserIndex).flags.TargetObjY = 0
-
-'Msg1114= No ves nada interesante.
-Call WriteLocaleMsg(UserIndex, "1114", e_FontTypeNames.FONTTYPE_INFO)
+                'Msg1114= No ves nada interesante.
+                Call WriteLocaleMsg(UserIndex, "1114", e_FontTypeNames.FONTTYPE_INFO)
             End If
 
         Else
@@ -1732,7 +1730,6 @@ Call WriteLocaleMsg(UserIndex, "1114", e_FontTypeNames.FONTTYPE_INFO)
 550             UserList(UserIndex).flags.TargetObjMap = 0
 552             UserList(UserIndex).flags.TargetObjX = 0
 554             UserList(UserIndex).flags.TargetObjY = 0
-
                 'Msg1106= No ves nada interesante.
                 Call WriteLocaleMsg(UserIndex, "1106", e_FontTypeNames.FONTTYPE_INFO)
             End If
@@ -1977,11 +1974,11 @@ Public Sub resetPj(ByVal UserIndex As Integer, Optional ByVal borrarHechizos As 
 172         .Char.CascoAnim = NingunCasco
 173         .char.CartAnim = NoCart
 
-            ' WyroX: Vida inicial
+            '  Vida inicial
 174         .Stats.MaxHp = .Stats.UserAtributos(e_Atributos.Constitucion)
 176         .Stats.MinHp = .Stats.MaxHp
 
-            ' WyroX: Maná inicial
+            '  Maná inicial
 178         .Stats.MaxMAN = .Stats.UserAtributos(e_Atributos.Inteligencia) * ModClase(.clase).ManaInicial
 180         .Stats.MinMAN = .Stats.MaxMAN
 
@@ -2088,8 +2085,7 @@ Public Sub ResucitarOCurar(ByVal UserIndex As Integer)
     
         UserList(UserIndex).Counters.timeFx = 3
         Call SendData(SendTarget.ToPCArea, UserIndex, PrepareMessageCreateFX(UserList(UserIndex).Char.charindex, 35, 1, UserList(UserIndex).Pos.X, UserList(UserIndex).Pos.Y))
-    
-        
+   
         ' Msg495=¡¡Hás sido resucitado!!
         Call WriteLocaleMsg(UserIndex, "495", e_FontTypeNames.FONTTYPE_INFO)
 
@@ -2258,9 +2254,8 @@ End Function
 Public Sub SendrequiredItemMessage(ByVal UserIndex As Integer, ByVal itemMask As e_SpellRequirementMask, ByVal Message As String)
     Select Case itemMask
         Case e_SpellRequirementMask.eArmor
-             ' Msg497=Necesitás una armadura
-                Call WriteLocaleMsg(UserIndex, "497", Message, e_FontTypeNames.FONTTYPE_INFO)
-
+            ' Msg497=Necesitás una armadura
+            Call WriteLocaleMsg(UserIndex, "497", Message, e_FontTypeNames.FONTTYPE_INFO)
         Case e_SpellRequirementMask.eHelm
              ' Msg564=Necesitás un casco
             Call WriteLocaleMsg(UserIndex, "564", Message, e_FontTypeNames.FONTTYPE_INFO)

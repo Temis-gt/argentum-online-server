@@ -534,10 +534,6 @@ End Sub
 
 Public Sub SaveBanDatabase(username As String, Reason As String, BannedBy As String)
 
-        '***************************************************
-        'Author: Juan Andres Dalmasso (CHOTS)
-        'Last Modification: 10/10/2018
-        '***************************************************
         On Error GoTo ErrorHandler
         
         Call Execute("UPDATE user SET is_banned = TRUE, banned_by = ?, ban_reason = ? WHERE UPPER(name) = ?;", BannedBy, Reason, UCase$(username))
@@ -553,10 +549,6 @@ End Sub
 
 Public Sub SaveWarnDatabase(username As String, Reason As String, WarnedBy As String)
 
-        '***************************************************
-        'Author: Juan Andres Dalmasso (CHOTS)
-        'Last Modification: 10/10/2018
-        '***************************************************
         On Error GoTo ErrorHandler
         
         Call Execute("UPDATE user SET warnings = warnings + 1 WHERE UPPER(name) = ?;", UCase$(username))
@@ -697,10 +689,6 @@ End Sub
 
 Public Function GetUserAmountOfPunishmentsDatabase(ByVal username As String) As Integer
 
-        '***************************************************
-        'Author: Juan Andres Dalmasso (CHOTS)
-        'Last Modification: 10/10/2018
-        '***************************************************
         On Error GoTo ErrorHandler
         
         Dim RS As ADODB.Recordset
@@ -718,10 +706,6 @@ End Function
 
 Public Sub SendUserPunishmentsDatabase(ByVal userIndex As Integer, ByVal username As String)
 
-        '***************************************************
-        'Author: Juan Andres Dalmasso (CHOTS)
-        'Last Modification: 10/10/2018
-        '***************************************************
         On Error GoTo ErrorHandler
 
         Dim RS As ADODB.Recordset
@@ -755,10 +739,6 @@ End Function
 
 Public Function GetUserGuildMemberDatabase(username As String) As String
 
-        '***************************************************
-        'Author: Juan Andres Dalmasso (CHOTS)
-        'Last Modification: 11/10/2018
-        '***************************************************
         On Error GoTo ErrorHandler
         Dim user_id As Long
         user_id = GetCharacterIdWithName(username)
@@ -789,10 +769,6 @@ End Function
 
 Public Function GetUserGuildAspirantDatabase(username As String) As Integer
 
-        '***************************************************
-        'Author: Juan Andres Dalmasso (CHOTS)
-        'Last Modification: 11/10/2018
-        '***************************************************
         On Error GoTo ErrorHandler
 
 100     GetUserGuildAspirantDatabase = SanitizeNullValue(GetUserValue(LCase$(username), "guild_aspirant_index"), 0)
@@ -806,10 +782,6 @@ End Function
 
 Public Function GetUserGuildPedidosDatabase(username As String) As String
 
-        '***************************************************
-        'Author: Juan Andres Dalmasso (CHOTS)
-        'Last Modification: 11/10/2018
-        '***************************************************
         On Error GoTo ErrorHandler
         Dim user_id As Long
         user_id = GetCharacterIdWithName(username)
@@ -840,10 +812,6 @@ End Function
 
 Public Sub SaveUserGuildRejectionReasonDatabase(username As String, Reason As String)
 
-        '***************************************************
-        'Author: Juan Andres Dalmasso (CHOTS)
-        'Last Modification: 11/10/2018
-        '***************************************************
         On Error GoTo ErrorHandler
 
 100     Call SetUserValue(username, "guild_rejected_because", Reason)
@@ -879,10 +847,6 @@ End Sub
 
 Public Sub SaveUserGuildPedidosDatabase(ByVal username As String, ByVal Pedidos As String)
 
-        '***************************************************
-        'Author: Juan Andres Dalmasso (CHOTS)
-        'Last Modification: 11/10/2018
-        '***************************************************
         On Error GoTo ErrorHandler
         Dim user_id As Long
         user_id = GetCharacterIdWithName(username)
@@ -896,10 +860,6 @@ End Sub
 
 Public Sub SendCharacterInfoDatabase(ByVal userIndex As Integer, ByVal username As String)
 
-        '***************************************************
-        'Author: Juan Andres Dalmasso (CHOTS)
-        'Last Modification: 11/10/2018
-        '***************************************************
         On Error GoTo ErrorHandler
 
         Dim gName       As String
@@ -1029,26 +989,8 @@ ErrorHandler:
 End Function
 
 Public Function AddOroBancoDatabase(username As String, ByVal OroGanado As Long) As Boolean
-        On Error GoTo ErrorHandler
-        
-        If EnableTelemetry Then
-            Dim RS As ADODB.Recordset
-            Set RS = Query("SELECT id, level, exp, gold, bank_gold, user_key FROM user WHERE UPPER(name) = ?", UCase$(username))
-            If RS Is Nothing Then
-                AddOroBancoDatabase = False
-                Exit Function
-            End If
-            Dim TelemetryOut(128) As Byte
-            Dim TelemetryLen As Long
-            Dim TelemetryInfo As String
-            TelemetryInfo = RS!user_key
-            TelemetryLen = AOT_SetUserKey(RS!id, RS!level, RS!Exp, RS!gold, RS!bank_gold + OroGanado, TelemetryInfo, Len(TelemetryInfo), TelemetryOut(0), 128)
-            TelemetryInfo = StrConv(TelemetryOut, vbUnicode)
-            TelemetryInfo = Left(TelemetryInfo, TelemetryLen)
-            AddOroBancoDatabase = Execute("UPDATE user SET bank_gold = bank_gold + ?, user_key = ? WHERE UPPER(name) = ?;", OroGanado, TelemetryInfo, UCase$(username))
-        Else
-102         AddOroBancoDatabase = Execute("UPDATE user SET bank_gold = bank_gold + ? WHERE UPPER(name) = ?;", OroGanado, UCase$(username))
-        End If
+On Error GoTo ErrorHandler
+        AddOroBancoDatabase = Execute("UPDATE user SET bank_gold = bank_gold + ? WHERE UPPER(name) = ?;", OroGanado, UCase$(username))
         Exit Function
 ErrorHandler:
     Call LogDatabaseError("Error in AddOroBancoDatabase. UserName: " & username & ". " & Err.Number & " - " & Err.Description)
