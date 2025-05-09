@@ -135,8 +135,7 @@ Public Sub FindLegalPos(ByVal UserIndex As Integer, ByVal Map As Integer, ByRef 
                         'Lo sacamos.
 142                     If UserList(OtherUserIndex).flags.UserLogged Then
 144                         Call FinComerciarUsu(OtherUserIndex)
-146                         Call WriteShowMessageBox(OtherUserIndex, "Alguien se ha conectado donde te encontrabas, por favor reconéctate...")
-                        
+146                         Call WriteShowMessageBox(OtherUserIndex, 1758, vbNullString) 'Msg1758=Alguien se ha conectado donde te encontrabas, por favor reconéctate...
 
                         End If
 
@@ -1611,6 +1610,9 @@ Sub LookatTile(ByVal UserIndex As Integer, ByVal Map As Integer, ByVal X As Inte
                 If EsGM(UserIndex) And GetOwnedBy(TempCharIndex) <> 0 Then
                     estatus = estatus & " | Owned by " & NpcList(TempCharIndex).flags.AttackedBy
                 End If
+#If DEBUGGING Then
+                estatus = estatus & " | NpcIndex = " & TempCharIndex
+#End If
                         
 456             estatus = estatus & ">"
     
@@ -1643,11 +1645,11 @@ Sub LookatTile(ByVal UserIndex As Integer, ByVal Map As Integer, ByVal X As Inte
                     End If
 470             ElseIf IsValidUserRef(NpcList(TempCharIndex).MaestroUser) Then
                     If UserList(UserIndex).flags.Muerto = 0 Then
-472                     Call WriteLocaleMsg(UserIndex, 1621, e_FontTypeNames.FONTTYPE_INFO, NpcList(TempCharIndex).Numero & "¬" & UserList(NpcList(TempCharIndex).MaestroUser.ArrayIndex).name & "¬" & estatus) 'Msg1621=NPC ¬1 es mascota de ¬2 ¬3
+472                     Call WriteLocaleMsg(UserIndex, 1621, e_FontTypeNames.FONTTYPE_INFO, NpcList(TempCharIndex).name & "¬" & UserList(NpcList(TempCharIndex).MaestroUser.ArrayIndex).name & "¬" & estatus) 'Msg1621=NPC ¬1 es mascota de ¬2 ¬3
                     End If
                 Else
                     If UserList(UserIndex).flags.Muerto = 0 Then
-                        Call WriteLocaleMsg(UserIndex, 1622, e_FontTypeNames.FONTTYPE_INFO, NpcList(TempCharIndex).Numero & "¬" & estatus) 'Msg1622=NPC ¬1 ¬2
+                        Call WriteLocaleMsg(UserIndex, 1622, e_FontTypeNames.FONTTYPE_INFO, NpcList(TempCharIndex).name & "¬" & estatus)  'Msg1622=NPC ¬1 ¬2
                     End If
                 End If
                ' End If
@@ -1680,7 +1682,7 @@ Sub LookatTile(ByVal UserIndex As Integer, ByVal Map As Integer, ByVal X As Inte
 502                                         If QuestList(.QuestIndex).RequiredTargetNPC(j).amount = .NPCsTarget(j) Then
 504                                             Call FinishQuest(UserIndex, .QuestIndex, i)
 506                                             Call WriteUpdateNPCSimbolo(UserIndex, TempCharIndex, 1)
-508                                             Call WriteLocaleChatOverHead(UserIndex, "1353", "", NpcList(TempCharIndex).Char.charindex, vbYellow) ' Msg1353=¡Quest Finalizada!
+508                                             Call WriteLocaleChatOverHead(UserIndex, "1353", "", NpcList(TempCharIndex).Char.charIndex, vbYellow) ' Msg1353=¡Quest Finalizada!
 510                                             ' Msg494=Quest Finalizada!
                                                 Call WriteLocaleMsg(UserIndex, "494", e_FontTypeNames.FONTTYPE_INFOIAO)
 

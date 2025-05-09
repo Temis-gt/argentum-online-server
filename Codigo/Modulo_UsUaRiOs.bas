@@ -158,7 +158,7 @@ On Error GoTo Check_ConnectUser_Err
     ConnectUser_Check = False
     'Controlamos no pasar el maximo de usuarios
     If NumUsers >= MaxUsers Then
-        Call WriteShowMessageBox(userIndex, "El servidor ha alcanzado el maximo de usuarios soportado, por favor vuelva a intertarlo mas tarde.")
+        Call WriteShowMessageBox(UserIndex, 1759, vbNullString) 'Msg1759=El servidor ha alcanzado el máximo de usuarios soportado, por favor vuelva a intentarlo más tarde.
         Call CloseSocket(userIndex)
         Exit Function
     End If
@@ -172,7 +172,7 @@ On Error GoTo Check_ConnectUser_Err
     End If
     
     If Not EsGM(userIndex) And ServerSoloGMs > 0 Then
-        Call WriteShowMessageBox(userIndex, "Servidor restringido a administradores. Por favor reintente en unos momentos.")
+        Call WriteShowMessageBox(UserIndex, 1760, vbNullString) 'Msg1760=Servidor restringido a administradores. Por favor reintente en unos momentos.
         Call CloseSocket(userIndex)
         Exit Function
     End If
@@ -192,15 +192,15 @@ On Error GoTo Check_ConnectUser_Err
             If Not IsValidUserRef(tIndex) Then
                 Call CloseSocket(tIndex.ArrayIndex)
             ElseIf IsFeatureEnabled("override_same_ip_connection") And .ConnectionDetails.IP = UserList(tIndex.ArrayIndex).ConnectionDetails.IP Then
-                Call WriteShowMessageBox(tIndex.ArrayIndex, "Alguien está ingresando con tu personaje. Si no has sido tú, por favor cambia la contraseña de tu cuenta.")
+                Call WriteShowMessageBox(tIndex.ArrayIndex, 1761, vbNullString) 'Msg1761=Alguien está ingresando con tu personaje. Si no has sido tú, por favor cambia la contraseña de tu cuenta.
                 Call CloseSocket(tIndex.ArrayIndex)
             Else
                 If UserList(tIndex.ArrayIndex).Counters.Saliendo Then
-                    Call WriteShowMessageBox(UserIndex, "El personaje está saliendo.")
+                    Call WriteShowMessageBox(UserIndex, 1762, vbNullString) 'Msg1762=El personaje está saliendo.
                 Else
-                    Call WriteShowMessageBox(UserIndex, "El personaje ya está conectado. Espere mientras es desconectado.")
+                    Call WriteShowMessageBox(UserIndex, 1763, vbNullString) 'Msg1763=El personaje ya está conectado. Espere mientras es desconectado.
                     ' Le avisamos al usuario que está jugando, en caso de que haya uno
-                    Call WriteShowMessageBox(tIndex.ArrayIndex, "Alguien está ingresando con tu personaje. Si no has sido tú, por favor cambia la contraseña de tu cuenta.")
+                    Call WriteShowMessageBox(tIndex.ArrayIndex, 1761, vbNullString) 'Msg1761=Alguien está ingresando con tu personaje. Si no has sido tú, por favor cambia la contraseña de tu cuenta.
                 End If
             Call CloseSocket(UserIndex)
             Exit Function
@@ -211,9 +211,9 @@ On Error GoTo Check_ConnectUser_Err
         If MaxUsersPorCuenta > 0 Then
             If ContarUsuariosMismaCuenta(.AccountID) >= MaxUsersPorCuenta Then
                 If MaxUsersPorCuenta = 1 Then
-                    Call WriteShowMessageBox(UserIndex, "Ya hay un usuario conectado con esta cuenta.")
+                    Call WriteShowMessageBox(UserIndex, 1764, vbNullString) 'Msg1764=Ya hay un usuario conectado con esta cuenta.
                 Else
-                    Call WriteShowMessageBox(UserIndex, "La cuenta ya alcanzó el máximo de " & MaxUsersPorCuenta & " usuarios conectados.")
+                    Call WriteShowMessageBox(UserIndex, 1765, MaxUsersPorCuenta) 'Msg1765=La cuenta ya alcanzó el máximo de ¬1 usuarios conectados.
                 End If
                 Call CloseSocket(UserIndex)
                 Exit Function
@@ -474,7 +474,7 @@ On Error GoTo Complete_ConnectUser_Err
             ' -----------------------------------------------------------------------
             
 520         If Not ValidateChr(UserIndex) Then
-525             Call WriteShowMessageBox(UserIndex, "Error en el personaje. Comuniquese con el staff.")
+525             Call WriteShowMessageBox(UserIndex, 1766, vbNullString) 'Msg1766=Error en el personaje. Comuniquese con el staff.
 530             Call CloseSocket(UserIndex)
                 Exit Function
 
@@ -580,8 +580,7 @@ On Error GoTo Complete_ConnectUser_Err
                             'Le avisamos al que estaba comerciando que se tuvo que ir.
 725                         If UserList(UserList(MapData(.pos.map, .pos.x, .pos.y).userIndex).ComUsu.DestUsu.ArrayIndex).flags.UserLogged Then
 730                             Call FinComerciarUsu(UserList(MapData(.pos.map, .pos.x, .pos.y).userIndex).ComUsu.DestUsu.ArrayIndex)
-735                             Call WriteConsoleMsg(UserList(MapData(.pos.map, .pos.x, .pos.y).userIndex).ComUsu.DestUsu.ArrayIndex, "Comercio cancelado. El otro usuario se ha desconectado.", e_FontTypeNames.FONTTYPE_WARNING)
-
+735                             Call WriteConsoleMsg(UserList(MapData(.pos.Map, .pos.x, .pos.y).UserIndex).ComUsu.DestUsu.ArrayIndex, PrepareMessageLocaleMsg(1925, vbNullString, e_FontTypeNames.FONTTYPE_WARNING)) ' Msg1925=Comercio cancelado. El otro usuario se ha desconectado.
                             End If
 
                             'Lo sacamos.
@@ -781,8 +780,7 @@ On Error GoTo Complete_ConnectUser_Err
              End If
 
 1100        If LenB(.LastGuildRejection) <> 0 Then
-1105            Call WriteShowMessageBox(UserIndex, "Tu solicitud de ingreso al clan ha sido rechazada. El clan te explica que: " & .LastGuildRejection)
-
+1105            Call WriteShowMessageBox(UserIndex, 1767, .LastGuildRejection) 'Msg1767=Tu solicitud de ingreso al clan ha sido rechazada. El clan te explica que: ¬1
                 .LastGuildRejection = vbNullString
                 
                 Call SaveUserGuildRejectionReason(.Name, vbNullString)
@@ -1782,18 +1780,21 @@ Sub SendUserStatsTxt(ByVal sendIndex As Integer, ByVal UserIndex As Integer)
 
 'Msg1295= Estadisticas de: ¬1
 Call WriteLocaleMsg(sendIndex, "1295", e_FontTypeNames.FONTTYPE_INFO, UserList(UserIndex).Name)
-102     Call WriteConsoleMsg(sendIndex, "Nivel: " & UserList(UserIndex).Stats.ELV & "  EXP: " & UserList(UserIndex).Stats.Exp & "/" & ExpLevelUp(UserList(UserIndex).Stats.ELV), e_FontTypeNames.FONTTYPE_INFO)
-104     Call WriteConsoleMsg(sendIndex, "Salud: " & UserList(UserIndex).Stats.MinHp & "/" & UserList(UserIndex).Stats.MaxHp & "  Mana: " & UserList(UserIndex).Stats.MinMAN & "/" & UserList(UserIndex).Stats.MaxMAN & "  Vitalidad: " & UserList(UserIndex).Stats.MinSta & "/" & UserList(UserIndex).Stats.MaxSta, e_FontTypeNames.FONTTYPE_INFO)
+102     Call WriteConsoleMsg(sendIndex, PrepareMessageLocaleMsg(1857, UserList(UserIndex).Stats.ELV & "¬" & UserList(UserIndex).Stats.Exp & "¬" & ExpLevelUp(UserList(UserIndex).Stats.ELV), e_FontTypeNames.FONTTYPE_INFO)) ' Msg1857=Nivel: ¬1  EXP: ¬2/¬3
+104     Call WriteConsoleMsg(sendIndex, PrepareMessageLocaleMsg(1858, UserList(UserIndex).Stats.MinHp & "¬" & UserList(UserIndex).Stats.MaxHp & "¬" & UserList(UserIndex).Stats.MinMAN & "¬" & UserList(UserIndex).Stats.MaxMAN & "¬" & UserList(UserIndex).Stats.MinSta & "¬" & UserList(UserIndex).Stats.MaxSta, e_FontTypeNames.FONTTYPE_INFO)) ' Msg1858=Salud: ¬1/¬2  Mana: ¬3/¬4  Vitalidad: ¬5/¬6
 106     If UserList(UserIndex).Invent.WeaponEqpObjIndex > 0 Then
-108         Call WriteConsoleMsg(sendIndex, "Menor Golpe/Mayor Golpe: " & UserList(UserIndex).Stats.MinHIT & "/" & UserList(UserIndex).Stats.MaxHit & " (" & ObjData(UserList(UserIndex).Invent.WeaponEqpObjIndex).MinHIT & "/" & ObjData(UserList(UserIndex).Invent.WeaponEqpObjIndex).MaxHit & ")", e_FontTypeNames.FONTTYPE_INFO)
+108         Call WriteConsoleMsg(sendIndex, PrepareMessageLocaleMsg(1859, UserList(UserIndex).Stats.MinHIT & "¬" & UserList(UserIndex).Stats.MaxHit & "¬" & ObjData(UserList(UserIndex).invent.WeaponEqpObjIndex).MinHIT & "¬" & ObjData(UserList(UserIndex).invent.WeaponEqpObjIndex).MaxHit, e_FontTypeNames.FONTTYPE_INFO)) ' Msg1859=Menor Golpe/Mayor Golpe: ¬1/¬2 (¬3/¬4)
         Else
-110         Call WriteConsoleMsg(sendIndex, "Menor Golpe/Mayor Golpe: " & UserList(UserIndex).Stats.MinHIT & "/" & UserList(UserIndex).Stats.MaxHit, e_FontTypeNames.FONTTYPE_INFO)
+110         Call WriteConsoleMsg(sendIndex, PrepareMessageLocaleMsg(1860, UserList(UserIndex).Stats.MinHIT & "¬" & UserList(UserIndex).Stats.MaxHit, e_FontTypeNames.FONTTYPE_INFO)) ' Msg1860=Menor Golpe/Mayor Golpe: ¬1/¬2
 
         End If
     
 112     If UserList(UserIndex).Invent.ArmourEqpObjIndex > 0 Then
 114         If UserList(UserIndex).Invent.EscudoEqpObjIndex > 0 Then
-116             Call WriteConsoleMsg(sendIndex, "(CUERPO) Min Def/Max Def: " & ObjData(UserList(UserIndex).Invent.ArmourEqpObjIndex).MinDef + ObjData(UserList(UserIndex).Invent.EscudoEqpObjIndex).MinDef & "/" & ObjData(UserList(UserIndex).Invent.ArmourEqpObjIndex).MaxDef + ObjData(UserList(UserIndex).Invent.EscudoEqpObjIndex).MaxDef, e_FontTypeNames.FONTTYPE_INFO)
+116             Call WriteConsoleMsg(sendIndex, PrepareMessageLocaleMsg(1861, _
+                    ObjData(UserList(UserIndex).invent.ArmourEqpObjIndex).MinDef + ObjData(UserList(UserIndex).invent.EscudoEqpObjIndex).MinDef & "¬" & _
+                    ObjData(UserList(UserIndex).invent.ArmourEqpObjIndex).MaxDef + ObjData(UserList(UserIndex).invent.EscudoEqpObjIndex).MaxDef, _
+                    e_FontTypeNames.FONTTYPE_INFO)) ' Msg1861=(CUERPO) Min Def/Max Def: ¬1/¬2
             Else
 118             Call WriteConsoleMsg(sendIndex, "(CUERPO) Min Def/Max Def: " & ObjData(UserList(UserIndex).Invent.ArmourEqpObjIndex).MinDef & "/" & ObjData(UserList(UserIndex).Invent.ArmourEqpObjIndex).MaxDef, e_FontTypeNames.FONTTYPE_INFO)
 
@@ -1806,7 +1807,10 @@ Call WriteLocaleMsg(sendIndex, "1295", e_FontTypeNames.FONTTYPE_INFO, UserList(U
         End If
     
 122     If UserList(UserIndex).Invent.CascoEqpObjIndex > 0 Then
-124         Call WriteConsoleMsg(sendIndex, "(CABEZA) Min Def/Max Def: " & ObjData(UserList(UserIndex).Invent.CascoEqpObjIndex).MinDef & "/" & ObjData(UserList(UserIndex).Invent.CascoEqpObjIndex).MaxDef, e_FontTypeNames.FONTTYPE_INFO)
+124         Call WriteConsoleMsg(sendIndex, PrepareMessageLocaleMsg(1862, _
+                ObjData(UserList(UserIndex).invent.CascoEqpObjIndex).MinDef & "¬" & _
+                ObjData(UserList(UserIndex).invent.CascoEqpObjIndex).MaxDef, _
+                e_FontTypeNames.FONTTYPE_INFO)) ' Msg1862=(CABEZA) Min Def/Max Def: ¬1/¬2
         Else
             'Msg1099= (CABEZA) Min Def/Max Def: 0
             Call WriteLocaleMsg(sendIndex, "1099", e_FontTypeNames.FONTTYPE_INFO)
@@ -1839,20 +1843,26 @@ Call WriteLocaleMsg(sendIndex, "1296", e_FontTypeNames.FONTTYPE_INFO, modGuilds.
 138         TempDate = Now - UserList(UserIndex).LogOnTime
 140         TempSecs = (UserList(UserIndex).UpTime + (Abs(Day(TempDate) - 30) * 24 * 3600) + (Hour(TempDate) * 3600) + (Minute(TempDate) * 60) + Second(TempDate))
 142         TempStr = (TempSecs \ 86400) & " Dias, " & ((TempSecs Mod 86400) \ 3600) & " Horas, " & ((TempSecs Mod 86400) Mod 3600) \ 60 & " Minutos, " & (((TempSecs Mod 86400) Mod 3600) Mod 60) & " Segundos."
-144         Call WriteConsoleMsg(sendIndex, "Logeado hace: " & Hour(TempDate) & ":" & Minute(TempDate) & ":" & Second(TempDate), e_FontTypeNames.FONTTYPE_INFO)
-'Msg1297= Total: ¬1
-Call WriteLocaleMsg(sendIndex, "1297", e_FontTypeNames.FONTTYPE_INFO, TempStr)
+144         Call WriteConsoleMsg(sendIndex, PrepareMessageLocaleMsg(1863, Hour(TempDate) & "¬" & Minute(TempDate) & "¬" & Second(TempDate), e_FontTypeNames.FONTTYPE_INFO)) ' Msg1863=Logeado hace: ¬1:¬2:¬3
+            'Msg1297= Total: ¬1
+            Call WriteLocaleMsg(sendIndex, "1297", e_FontTypeNames.FONTTYPE_INFO, TempStr)
         #End If
 
         Call LoadPatronCreditsFromDB(UserIndex)
-'Msg1298= Oro: ¬1
-Call WriteLocaleMsg(sendIndex, "1298", e_FontTypeNames.FONTTYPE_INFO, UserList(UserIndex).Stats.GLD)
-150     Call WriteConsoleMsg(sendIndex, "Dados: " & UserList(UserIndex).Stats.UserAtributos(e_Atributos.Fuerza) & ", " & UserList(UserIndex).Stats.UserAtributos(e_Atributos.Agilidad) & ", " & UserList(UserIndex).Stats.UserAtributos(e_Atributos.Inteligencia) & ", " & UserList(UserIndex).Stats.UserAtributos(e_Atributos.Constitucion) & ", " & UserList(UserIndex).Stats.UserAtributos(e_Atributos.Carisma), e_FontTypeNames.FONTTYPE_INFO)
-'Msg1299= Veces que Moriste: ¬1
-Call WriteLocaleMsg(sendIndex, "1299", e_FontTypeNames.FONTTYPE_INFO, UserList(UserIndex).flags.VecesQueMoriste)
+        'Msg1298= Oro: ¬1
+        Call WriteLocaleMsg(sendIndex, "1298", e_FontTypeNames.FONTTYPE_INFO, UserList(UserIndex).Stats.GLD)
+150     Call WriteConsoleMsg(sendIndex, PrepareMessageLocaleMsg(1864, _
+            UserList(UserIndex).Stats.UserAtributos(e_Atributos.Fuerza) & "¬" & _
+            UserList(UserIndex).Stats.UserAtributos(e_Atributos.Agilidad) & "¬" & _
+            UserList(UserIndex).Stats.UserAtributos(e_Atributos.Inteligencia) & "¬" & _
+            UserList(UserIndex).Stats.UserAtributos(e_Atributos.Constitucion) & "¬" & _
+            UserList(UserIndex).Stats.UserAtributos(e_Atributos.Carisma), _
+            e_FontTypeNames.FONTTYPE_INFO)) ' Msg1864=Dados: ¬1, ¬2, ¬3, ¬4, ¬5
+        'Msg1299= Veces que Moriste: ¬1
+        Call WriteLocaleMsg(sendIndex, "1299", e_FontTypeNames.FONTTYPE_INFO, UserList(UserIndex).flags.VecesQueMoriste)
 154     Call WriteLocaleMsg(sendIndex, MsgFactionScore, e_FontTypeNames.FONTTYPE_INFO, UserList(UserIndex).Faccion.FactionScore)
-'Msg1300= Creditos Patreon: ¬1
-Call WriteLocaleMsg(sendIndex, "1300", e_FontTypeNames.FONTTYPE_INFO, UserList(UserIndex).Stats.Creditos)
+        'Msg1300= Creditos Patreon: ¬1
+        Call WriteLocaleMsg(sendIndex, "1300", e_FontTypeNames.FONTTYPE_INFO, UserList(UserIndex).Stats.Creditos)
         Exit Sub
 
 SendUserStatsTxt_Err:
@@ -1921,14 +1931,13 @@ Sub SendUserInvTxt(ByVal sendIndex As Integer, ByVal UserIndex As Integer)
         Dim j As Long
     
 100     Call WriteConsoleMsg(sendIndex, UserList(UserIndex).Name, e_FontTypeNames.FONTTYPE_INFO)
-'Msg1311= Tiene ¬1 objetos.
-Call WriteLocaleMsg(sendIndex, "1311", e_FontTypeNames.FONTTYPE_INFO, UserList(UserIndex).Invent.NroItems)
+        'Msg1311= Tiene ¬1 objetos.
+        Call WriteLocaleMsg(sendIndex, "1311", e_FontTypeNames.FONTTYPE_INFO, UserList(UserIndex).invent.NroItems)
     
 104     For j = 1 To UserList(UserIndex).CurrentInventorySlots
 
 106         If UserList(UserIndex).Invent.Object(j).ObjIndex > 0 Then
-108             Call WriteConsoleMsg(sendIndex, " Objeto " & j & " " & ObjData(UserList(UserIndex).Invent.Object(j).ObjIndex).Name & " Cantidad:" & UserList(UserIndex).Invent.Object(j).amount, e_FontTypeNames.FONTTYPE_INFO)
-
+108             Call WriteConsoleMsg(sendIndex, PrepareMessageLocaleMsg(1865, j & "¬" & ObjData(UserList(UserIndex).invent.Object(j).ObjIndex).name & "¬" & UserList(UserIndex).invent.Object(j).amount, e_FontTypeNames.FONTTYPE_INFO)) ' Msg1865= Objeto ¬1 ¬2 Cantidad:¬3
             End If
 
 110     Next j
