@@ -2052,12 +2052,9 @@ Sub UseInvItem(ByVal UserIndex As Integer, ByVal Slot As Byte, ByVal ByClick As 
                                 ' Verifica si el jugador está en la ARENA
                                 Dim triggerStatus As e_Trigger6
                                 triggerStatus = TriggerZonaPelea(UserIndex, UserIndex)
-                            
-                                ' Si NO está en las zonas permitidas, se consume la poción
-                                If Not ((UserList(UserIndex).pos.Map >= 600 And UserList(UserIndex).pos.Map <= 749 And triggerStatus = e_Trigger6.TRIGGER6_PERMITE) Or _
-                                        (UserList(UserIndex).pos.Map = 275 Or UserList(UserIndex).pos.Map = 276 Or UserList(UserIndex).pos.Map = 277) Or _
-                                        (UserList(UserIndex).pos.Map = 172 And triggerStatus = e_Trigger6.TRIGGER6_PERMITE And _
-                                        (UserList(UserIndex).Stats.tipoUsuario = tAventurero Or UserList(UserIndex).Stats.tipoUsuario = tHeroe Or UserList(UserIndex).Stats.tipoUsuario = tLeyenda))) Then
+
+                                ' Consumir pocion solo si el usuario no esta en zona de uso libre
+                                If Not IsPotionFreeZone(UserIndex, triggerStatus) Then
                                     ' Quitamos el ítem del inventario
                                     Call QuitarUserInvItem(UserIndex, Slot, 1)
                                 End If
@@ -2200,6 +2197,7 @@ Sub UseInvItem(ByVal UserIndex As Integer, ByVal Slot As Byte, ByVal ByClick As 
                 
 440                         .Char.Head = CabezaFinal
 442                         .OrigChar.Head = CabezaFinal
+                            .OrigChar.originalhead = CabezaFinal 'cabeza final
 444                         Call ChangeUserChar(UserIndex, .Char.body, CabezaFinal, .Char.Heading, .Char.WeaponAnim, .Char.ShieldAnim, .Char.CascoAnim, .Char.CartAnim)
                             'Quitamos del inv el item
                             
@@ -2602,8 +2600,8 @@ Sub UseInvItem(ByVal UserIndex As Integer, ByVal Slot As Byte, ByVal ByClick As 
                             Dim S As Byte
                     
 922                         If .Stats.UserSkills(e_Skill.liderazgo) >= 80 Then
-'Msg889= Has fundado un clan, no podes resetar tus skills.
-Call WriteLocaleMsg(UserIndex, "889", e_FontTypeNames.FONTTYPE_INFOIAO)
+                                'Msg889= Has fundado un clan, no podes resetar tus skills.
+                                Call WriteLocaleMsg(UserIndex, "889", e_FontTypeNames.FONTTYPE_INFOIAO)
                                 Exit Sub
     
                             End If
@@ -2812,22 +2810,22 @@ Call WriteLocaleMsg(UserIndex, "889", e_FontTypeNames.FONTTYPE_INFOIAO)
                                     MapData(UserList(UserIndex).flags.TargetObjMap, UserList(UserIndex).flags.TargetObjX, UserList(UserIndex).flags.TargetObjY).ObjInfo.ObjIndex _
                                     = ObjData(MapData(UserList(UserIndex).flags.TargetObjMap, UserList(UserIndex).flags.TargetObjX, UserList(UserIndex).flags.TargetObjY).ObjInfo.ObjIndex).IndexCerrada
                                     UserList(UserIndex).flags.TargetObj = MapData(UserList(UserIndex).flags.TargetObjMap, UserList(UserIndex).flags.TargetObjX, UserList(UserIndex).flags.TargetObjY).ObjInfo.ObjIndex
-'Msg897= Has abierto la puerta.
-Call WriteLocaleMsg(UserIndex, "897", e_FontTypeNames.FONTTYPE_INFO)
+                                    'Msg897= Has abierto la puerta.
+                                    Call WriteLocaleMsg(UserIndex, "897", e_FontTypeNames.FONTTYPE_INFO)
                                     clavellave = obj.clave
                                     Call EliminarLlaves(ClaveLlave, UserIndex)
                                     Exit Sub
                                  Else
-'Msg898= La llave no sirve.
-Call WriteLocaleMsg(UserIndex, "898", e_FontTypeNames.FONTTYPE_INFO)
+                                    'Msg898= La llave no sirve.
+                                    Call WriteLocaleMsg(UserIndex, "898", e_FontTypeNames.FONTTYPE_INFO)
                                     Exit Sub
                                  End If
                               Else
                                  If TargObj.clave = obj.clave Then
                                     MapData(UserList(UserIndex).flags.TargetObjMap, UserList(UserIndex).flags.TargetObjX, UserList(UserIndex).flags.TargetObjY).ObjInfo.ObjIndex _
                                     = ObjData(MapData(UserList(UserIndex).flags.TargetObjMap, UserList(UserIndex).flags.TargetObjX, UserList(UserIndex).flags.TargetObjY).ObjInfo.ObjIndex).IndexCerradaLlave
-'Msg899= Has cerrado con llave la puerta.
-Call WriteLocaleMsg(UserIndex, "899", e_FontTypeNames.FONTTYPE_INFO)
+                                    'Msg899= Has cerrado con llave la puerta.
+                                    Call WriteLocaleMsg(UserIndex, "899", e_FontTypeNames.FONTTYPE_INFO)
                                     UserList(UserIndex).flags.TargetObj = MapData(UserList(UserIndex).flags.TargetObjMap, UserList(UserIndex).flags.TargetObjX, UserList(UserIndex).flags.TargetObjY).ObjInfo.ObjIndex
                                     Exit Sub
                                 Else
@@ -2837,8 +2835,8 @@ Call WriteLocaleMsg(UserIndex, "899", e_FontTypeNames.FONTTYPE_INFO)
                                  End If
                               End If
                         Else
-'Msg901= No esta cerrada.
-Call WriteLocaleMsg(UserIndex, "901", e_FontTypeNames.FONTTYPE_INFO)
+                                'Msg901= No esta cerrada.
+                                Call WriteLocaleMsg(UserIndex, "901", e_FontTypeNames.FONTTYPE_INFO)
                               Exit Sub
                         End If
                     End If
@@ -2855,14 +2853,14 @@ Call WriteLocaleMsg(UserIndex, "901", e_FontTypeNames.FONTTYPE_INFO)
                     End If
                     
 1064                 If (MapData(.Pos.Map, .flags.TargetX, .flags.TargetY).Blocked And FLAG_AGUA) = 0 Then
-'Msg902= No hay agua allí.
-Call WriteLocaleMsg(UserIndex, "902", e_FontTypeNames.FONTTYPE_INFO)
+                        'Msg902= No hay agua allí.
+                        Call WriteLocaleMsg(UserIndex, "902", e_FontTypeNames.FONTTYPE_INFO)
                          Exit Sub
                     End If
                     
                     If Distance(UserList(UserIndex).Pos.X, UserList(UserIndex).Pos.Y, .flags.TargetX, .flags.TargetY) > 2 Then
-'Msg903= Debes acercarte más al agua.
-Call WriteLocaleMsg(UserIndex, "903", e_FontTypeNames.FONTTYPE_INFO)
+                        'Msg903= Debes acercarte más al agua.
+                        Call WriteLocaleMsg(UserIndex, "903", e_FontTypeNames.FONTTYPE_INFO)
                         Exit Sub
                     End If
     
@@ -2930,8 +2928,8 @@ Call WriteLocaleMsg(UserIndex, "903", e_FontTypeNames.FONTTYPE_INFO)
                               'End If
                           Else
                  
-'Msg906= Por mas que lo intentas, no podés comprender el manuescrito.
-Call WriteLocaleMsg(UserIndex, "906", e_FontTypeNames.FONTTYPE_INFO)
+                            'Msg906= Por mas que lo intentas, no podés comprender el manuescrito.
+                            Call WriteLocaleMsg(UserIndex, "906", e_FontTypeNames.FONTTYPE_INFO)
        
                           End If
             
@@ -3226,6 +3224,48 @@ hErr:
 1350    LogError "Error en useinvitem Usuario: " & UserList(UserIndex).Name & " item:" & obj.Name & " index: " & UserList(UserIndex).Invent.Object(Slot).ObjIndex
 
 End Sub
+
+'**************************************************************
+' Description: Determines whether the user is in a map zone
+'              where potions are not consumed upon use.
+'
+' Parameters:  UserIndex      - Index of the user
+'              triggerStatus  - Current trigger status of the user
+'
+' Returns:     Boolean - True if the user is in a potion-free zone
+'                       False if the potion should be consumed
+'************************************************************** 
+Private Function IsPotionFreeZone(ByVal UserIndex As Integer, ByVal triggerStatus As e_Trigger6) As Boolean
+    Dim currentMap As Integer
+    Dim isTriggerZone As Boolean
+    Dim isTierUser As Boolean
+    Dim isTournamentZone As Boolean
+    Dim isSpecialZone As Boolean
+    Dim isTrainingZone As Boolean
+
+    ' Obtener el mapa actual del usuario
+    currentMap = UserList(UserIndex).pos.Map
+
+    ' Verificar si está en zona con trigger activo
+    isTriggerZone = (triggerStatus = e_Trigger6.TRIGGER6_PERMITE)
+
+    ' Verificar si es un usuario con tier de suscripción
+    isTierUser = (UserList(UserIndex).Stats.tipoUsuario = tAventurero Or _
+                  UserList(UserIndex).Stats.tipoUsuario = tHeroe Or _
+                  UserList(UserIndex).Stats.tipoUsuario = tLeyenda)
+
+    ' Zona de casas/sotanos arenas: mapas del 600 al 749 con trigger activo
+    isTournamentZone = (currentMap >= 600 And currentMap <= 749 And isTriggerZone)
+
+    ' Zonas especiales fijas donde no se consumen pociones
+    isSpecialZone = (currentMap = 275 Or currentMap = 276 Or currentMap = 277 Or currentMap = 390)
+
+    ' Zona de entrenamiento: mapa 172, con trigger activo y jugador con tier
+    isTrainingZone = (currentMap = 172 And isTriggerZone And isTierUser)
+
+    ' Si esta en alguna de las zonas anteriores, no se consume la poción
+    IsPotionFreeZone = (isTournamentZone Or isSpecialZone Or isTrainingZone)
+End Function
 
 Sub EnivarArmasConstruibles(ByVal UserIndex As Integer)
         
