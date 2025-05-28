@@ -466,6 +466,8 @@ On Error Resume Next
             Call HandlePunishments(UserIndex)
         Case ClientPacketID.eGamble
             Call HandleGamble(UserIndex)
+        Case ClientPacketID.eMapPriceEntrance
+            Call HandleMapPriceEntrance(UserIndex)
         Case ClientPacketID.eLeaveFaction
             Call HandleLeaveFaction(UserIndex)
         Case ClientPacketID.eBankExtractGold
@@ -906,6 +908,8 @@ On Error Resume Next
             Call HandleUseHKeySlot(UserIndex)
         Case ClientPacketID.eAntiCheatMessage
             Call HandleAntiCheatMessage(UserIndex)
+        Case ClientPacketID.eFactionMessage
+            Call HandleFactionMessage(UserIndex)
 #If PYMMO = 0 Then
         Case ClientPacketID.eCreateAccount
             Call HandleCreateAccount(ConnectionId)
@@ -3435,7 +3439,7 @@ Private Sub HandleCreateNewGuild(ByVal UserIndex As Integer)
                 'Update tag
 122             Call RefreshCharStatus(UserIndex)
             Else
-124             Call WriteConsoleMsg(UserIndex, errorStr, e_FontTypeNames.FONTTYPE_GUILD)
+124             Call WriteConsoleMsg(UserIndex, PrepareMessageLocaleMsg(errorStr, vbNullString, e_FontTypeNames.FONTTYPE_GUILD))
 
         End If
 
@@ -4777,7 +4781,7 @@ Private Sub HandleGuildRequestMembership(ByVal UserIndex As Integer)
 104         application = Reader.ReadString8()
         
 106         If Not modGuilds.a_NuevoAspirante(UserIndex, guild, application, errorStr) Then
-108             Call WriteConsoleMsg(UserIndex, errorStr, e_FontTypeNames.FONTTYPE_GUILD)
+108             Call WriteConsoleMsg(UserIndex, PrepareMessageLocaleMsg(errorStr, vbNullString, e_FontTypeNames.FONTTYPE_GUILD))
 
             Else
                 'Msg1155= Tu solicitud ha sido enviada. Espera prontas noticias del líder de ¬1
@@ -6628,7 +6632,77 @@ ErrHandler:
 110
 
 End Sub
+Private Sub HandleFactionMessage(ByVal UserIndex As Integer)
 
+        On Error GoTo ErrHandler
+
+        Dim currentTime As Long
+        Dim ElapsedTime As Long
+        Dim Message As String
+        Dim factionLabel As String
+        Dim fontType As e_FontTypeNames
+        Dim target As Byte
+        
+        With UserList(UserIndex)
+            Message = reader.ReadString8()
+            
+            If LenB(message) = 0 Then Exit Sub
+            
+            currentTime = GetTickCount()
+            elapsedTime = currentTime - .Counters.MensajeGlobal
+            
+            'Si esta silenciado no le deja enviar mensaje
+            If .flags.Silenciado = 1 Then
+                Call WriteLocaleMsg(UserIndex, "110", e_FontTypeNames.FONTTYPE_VENENO, .flags.MinutosRestantes)
+                Exit Sub
+            End If
+            
+            'Previene spam de mensajes globales
+            If elapsedTime < IntervaloMensajeGlobal Then
+                ' Msg548=No puedes escribir mensajes globales tan rápido.
+                Call WriteLocaleMsg(UserIndex, "548", e_FontTypeNames.FONTTYPE_WARNING)
+                Exit Sub
+            End If
+            
+            'Actualiza el tiempo del último mensaje
+            .Counters.MensajeGlobal = currentTime
+            
+            'Determina la etiqueta y estilo según la facción
+            Select Case .Faccion.Status
+                Case e_Facciones.consejo
+                    factionLabel = "MENSAJE_CONSEJO"
+                    fontType = e_FontTypeNames.FONTTYPE_CONSEJO
+                    target = SendTarget.ToRealYRMs
+    
+                Case e_Facciones.Armada
+                    factionLabel = "MENSAJE_ARMADA"
+                    fontType = e_FontTypeNames.FONTTYPE_CITIZEN_ARMADA
+                    target = SendTarget.ToRealYRMs
+    
+                Case e_Facciones.concilio
+                    factionLabel = "MENSAJE_CONCILIO"
+                    fontType = e_FontTypeNames.FONTTYPE_CONSEJOCAOS
+                    target = SendTarget.ToCaosYRMs
+    
+                Case e_Facciones.Caos
+                    factionLabel = "MENSAJE_LEGION"
+                    fontType = e_FontTypeNames.FONTTYPE_CRIMINAL_CAOS
+                    target = SendTarget.ToCaosYRMs
+    
+                Case Else
+                    Exit Sub 'Si no pertenece a ninguna facción válida
+            End Select
+            
+            'Envía el mensaje de facción
+            Dim formattedMessage As String
+            formattedMessage = " " & .name & "> " & Message
+            Call SendData(Target, 0, PrepareFactionMessageConsole(factionLabel, formattedMessage, fontType))
+        End With
+        Exit Sub
+
+ErrHandler:
+        Call TraceError(Err.Number, Err.Description, "Protocol.HandleFactionMessage", Erl)
+End Sub
 ''
 ' Handles the "AcceptRoyalCouncilMember" message.
 '
