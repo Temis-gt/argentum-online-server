@@ -117,7 +117,7 @@ Public Sub CompletarAccionFin(ByVal UserIndex As Integer)
 
              Select Case obj.TipoRuna
 
-                    Case 1 'Cuando esta muerto lleva al lugar de Origen
+                    Case e_RuneType.ReturnHome 'lleva a la ciudad de origen vivo o muerto
 
                         Dim DeDonde As t_CityWorldPos
 
@@ -148,6 +148,9 @@ Public Sub CompletarAccionFin(ByVal UserIndex As Integer)
                                  
                              Case e_Ciudad.cForgat
                                  DeDonde = CityForgat
+
+                             Case e_Ciudad.cEldoria
+                                 DeDonde = CityEldoria
                         
                              Case e_Ciudad.cArkhein
                                  DeDonde = CityArkhein
@@ -186,6 +189,10 @@ Public Sub CompletarAccionFin(ByVal UserIndex As Integer)
                         
                                  Case e_Ciudad.cArkhein
                                      DeDonde = CityArkhein
+                                 
+                                 Case e_Ciudad.cEldoria
+                                     DeDonde = CityEldoria
+
                         
                                  Case Else
                                      DeDonde = CityUllathorpe
@@ -216,6 +223,9 @@ Public Sub CompletarAccionFin(ByVal UserIndex As Integer)
                         
                                  Case e_Ciudad.cArkhein
                                      DeDonde = CityArkhein
+
+                                 Case e_Ciudad.cEldoria
+                                     DeDonde = CityEldoria
                         
                                  Case Else
                                      DeDonde = CityUllathorpe
@@ -277,7 +287,7 @@ Public Sub CompletarAccionFin(ByVal UserIndex As Integer)
                      UserList(UserIndex).Accion.RunaObj = 0
                      UserList(UserIndex).Accion.ObjSlot = 0
               
-                 Case 2
+                 Case e_RuneType.Escape
                      map = obj.HastaMap
                      X = obj.HastaX
                      y = obj.HastaY
@@ -313,7 +323,38 @@ Public Sub CompletarAccionFin(ByVal UserIndex As Integer)
                      UserList(UserIndex).Accion.ObjSlot = 0
                      UserList(UserIndex).Accion.AccionPendiente = False
 
-            
+
+                    Case e_RuneType.MesonSafePassage
+
+                        If UserList(UserIndex).Pos.Map = MAP_MESON_HOSTIGADO or UserList(UserIndex).Pos.Map = MAP_MESON_HOSTIGADO_TRADING_ZONE Then
+                            'mensaje de error de "no puedes usar la runa estando en el meson"
+                            Call WriteLocaleMsg(UserIndex, "2081", e_FontTypeNames.FONTTYPE_INFO)
+                            Exit Sub
+                        End If
+
+                        If obj.HastaMap <> MAP_MESON_HOSTIGADO Then
+                            'mensaje de error de runa invalida, hay algo mal dateado llamar a un gm o avisar a soporte
+                            Call WriteLocaleMsg(UserIndex, "2080", e_FontTypeNames.FONTTYPE_INFO)
+                            Exit Sub
+                        End If
+                        
+                        UserList(UserIndex).flags.ReturnPos = UserList(UserIndex).Pos
+                        
+                        Map = obj.HastaMap
+                        x = obj.HastaX
+                        y = obj.HastaY
+                        
+                        Call WarpUserChar(UserIndex, Map, x, y, True)
+                        'Msg1066= Te has teletransportado por el mundo.
+                        Call WriteLocaleMsg(UserIndex, "1066", e_FontTypeNames.FONTTYPE_WARNING)
+                        
+                        UserList(UserIndex).Accion.Particula = 0
+                        UserList(UserIndex).Accion.TipoAccion = e_AccionBarra.CancelarAccion
+                        UserList(UserIndex).Accion.HechizoPendiente = 0
+                        UserList(UserIndex).Accion.RunaObj = 0
+                        UserList(UserIndex).Accion.ObjSlot = 0
+                        UserList(UserIndex).Accion.AccionPendiente = False
+                        
                 End Select
                 
          Case e_AccionBarra.Hogar
@@ -683,13 +724,16 @@ Sub Accion(ByVal UserIndex As Integer, ByVal Map As Integer, ByVal X As Integer,
 302                             DeDonde = "Lindos"
                             
 304                         Case e_Ciudad.cArghal
-306                             DeDonde = " Arghal"
+306                             DeDonde = "Arghal"
                         
                             Case e_Ciudad.cForgat
-                                DeDonde = " Forgat"
+                                DeDonde = "Forgat"
+
+                            Case e_Ciudad.cEldoria
+                                DeDonde = "Eldoria"
                             
 308                         Case e_Ciudad.cArkhein
-310                             DeDonde = " Arkhein"
+310                             DeDonde = "Arkhein"
 
 312                         Case Else
 314                             DeDonde = "Ullathorpe"
