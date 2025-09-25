@@ -478,6 +478,9 @@ Sub ResetNpcMainInfo(ByVal NpcIndex As Integer)
         
     With (NpcList(NpcIndex))
 100     .Attackable = 0
+        .pathFindingInfo.TargetUnreachable = False
+        .pathFindingInfo.PreviousAttackable = 0
+        .pathFindingInfo.PathLength = 0
 102     .Comercia = 0
 104     .GiveEXP = 0
 106     .GiveEXPClan = 0
@@ -1084,7 +1087,7 @@ Function SpawnNpc(ByVal NpcIndex As Integer, Pos As t_WorldPos, ByVal FX As Bool
 
 136     If FX Then
 138         Call SendData(SendTarget.ToNPCAliveArea, nIndex, PrepareMessagePlayWave(SND_WARP, X, y))
-140         Call SendData(SendTarget.ToNPCAliveArea, nIndex, PrepareMessageCreateFX(NpcList(nIndex).Char.charindex, e_FXIDs.FXWARP, 0))
+140         Call SendData(SendTarget.ToNPCAliveArea, nIndex, PrepareMessageCreateFX(NpcList(nIndex).Char.charindex, e_GraphicEffects.ModernGmWarp, 0))
 
         End If
 
@@ -1557,6 +1560,8 @@ Function OpenNPC(ByVal NpcNumber As Integer, _
             '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< PATHFINDING >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
             .pathFindingInfo.RangoVision = val(Leer.GetValue("NPC" & NpcNumber, "Distancia", RANGO_VISION_X))
             .pathFindingInfo.OriginalVision = .pathFindingInfo.RangoVision
+            .pathFindingInfo.TargetUnreachable = False
+            .pathFindingInfo.PreviousAttackable = .Attackable
             ReDim .pathFindingInfo.Path(1 To MAX_PATH_LENGTH)
     
             '<<<<<<<<<<<<<< Sistema de Viajes NUEVO >>>>>>>>>>>>>>>>
@@ -1845,7 +1850,7 @@ Sub WarpNpcChar(ByVal NpcIndex As Integer, ByVal Map As Byte, ByVal X As Integer
 
 120         If FX Then                                    'FX
 122             Call SendData(SendTarget.ToNPCAliveArea, NpcIndex, PrepareMessagePlayWave(SND_WARP, NuevaPos.X, NuevaPos.y))
-124             Call SendData(SendTarget.ToNPCAliveArea, NpcIndex, PrepareMessageCreateFX(NpcList(NpcIndex).Char.charindex, e_FXIDs.FXWARP, 0))
+124             Call SendData(SendTarget.ToNPCAliveArea, NpcIndex, PrepareMessageCreateFX(NpcList(NpcIndex).Char.charindex, e_GraphicEffects.ModernGmWarp, 0))
             End If
 
         End If
@@ -2044,7 +2049,7 @@ UserCanAttackNpc.TurnPK = False
      End If
      
      'Es una criatura atacable?
-128  If NpcList(NpcIndex).Attackable = 0 Then
+128  If NpcList(NpcIndex).Attackable = 0 Or NpcList(NpcIndex).pathFindingInfo.TargetUnreachable Then
 132     UserCanAttackNpc.Result = eInmuneNpc
         Exit Function
      End If
