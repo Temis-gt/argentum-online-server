@@ -1499,8 +1499,8 @@ Public Enum e_OBJType
     otFullBottle = 34
     otRingAccesory = 35
     otPassageTicket = 36
-    otSkinsWings = 37           'Skins de Alas
-    otMap = 38
+    otMap = 37
+    otSkinsWings = 38          'Skins de Alas
     otSkinsArmours = 39         'Skins de Armaduras
     otSkinsShields = 40         'Skins de Escudos
     otSkinsHelmets = 41         'Skins de Cascos o Sombreros, o todo lo que vaya en la cabeza
@@ -3025,6 +3025,7 @@ Public Type t_NPCFlags
     MapTargetEntryX As Byte
     MapTargetEntryY As Byte
     ArenaEnabled As Boolean
+    ImmuneToSpells As Byte
     AfectaParalisis As Byte
     GolpeExacto As Byte
     Domable As Integer
@@ -3091,6 +3092,11 @@ Public Type t_NpcPathFindingInfo
     OriginalVision As Single
     TargetUnreachable As Boolean
     PreviousAttackable As Byte
+    StrafeOffset As t_Position
+    StrafeExpiresAt As Long
+    OrbitDirection As Integer
+    OrbitReevaluateAt As Long
+    NextPathRecomputeAt As Long
     '* By setting PathLenght to 0 we force the recalculation
     '  of the path, this is very useful. For example,
     '  if a NPC or a User moves over the npc's path, blocking
@@ -3212,6 +3218,7 @@ Public Type t_NpcInfoCache
     AfectaParalisis As Integer
     GolpeExacto As Integer
     TranslationInmune As Integer
+    ImmuneToSpells As Integer
     Snd1 As Integer
     Snd2 As Integer
     Snd3 As Integer
