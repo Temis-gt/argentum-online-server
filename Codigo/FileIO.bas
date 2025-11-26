@@ -867,6 +867,9 @@ Sub LoadBalance()
     MaxInvisibleSpellDisplayTime = val(BalanceIni.GetValue("EXTRA", "MaxInvisibleSpellDisplayTime"))
     MultiShotReduction = val(BalanceIni.GetValue("EXTRA", "MultiShotReduction"))
     HomeTimer = val(BalanceIni.GetValue("EXTRA", "HomeTimer"))
+    HomeTimerAdventurer = val(BalanceIni.GetValue("EXTRA", "HomeTimerAdventurer"))
+    HomeTimerHero = val(BalanceIni.GetValue("EXTRA", "HomeTimerHero"))
+    HomeTimerLegend = val(BalanceIni.GetValue("EXTRA", "HomeTimerLegend"))
     MagicSkillBonusDamageModifier = val(BalanceIni.GetValue("EXTRA", "MagicSkillBonusDamageModifier"))
     MRSkillProtectionModifier = val(BalanceIni.GetValue("EXTRA", "MagicResistanceSkillProtectionModifier"))
     MRSkillNpcProtectionModifier = val(BalanceIni.GetValue("EXTRA", "MagicResistanceSkillProtectionModifierNpc"))
@@ -2257,8 +2260,8 @@ Sub LoadIntervalos()
     '&&&&&&&&&&&&&&&&&&&&& TIMERS &&&&&&&&&&&&&&&&&&&&&&&
     IntervaloUserPuedeCastear = val(Lector.GetValue("INTERVALOS", "IntervaloLanzaHechizo"))
     FrmInterv.txtIntervaloLanzaHechizo.Text = IntervaloUserPuedeCastear
-    frmMain.TIMER_AI.Interval = val(Lector.GetValue("INTERVALOS", "IntervaloNpcAI"))
-    FrmInterv.txtAI.Text = frmMain.TIMER_AI.Interval
+    Call InitializeNpcAiInterval(val(Lector.GetValue("INTERVALOS", "IntervaloNpcAI", CStr(DEFAULT_NPC_AI_INTERVAL_MS))))
+    FrmInterv.txtAI.Text = IntervaloNPCAI
     IntervaloTrabajarExtraer = val(Lector.GetValue("INTERVALOS", "IntervaloTrabajarExtraer"))
     FrmInterv.txtTrabajoExtraer.Text = IntervaloTrabajarExtraer
     IntervaloTrabajarConstruir = val(Lector.GetValue("INTERVALOS", "IntervaloTrabajarConstruir"))

@@ -69,7 +69,6 @@ Public IntervaloInvisible            As Integer
 Public IntervaloFrio                 As Integer
 Public IntervaloWavFx                As Integer
 Public IntervaloNPCPuedeAtacar       As Integer
-Public IntervaloNPCAI                As Integer
 Public IntervaloInvocacion           As Integer
 Public IntervaloOculto               As Integer '[Nacho]
 Public IntervaloUserPuedeAtacar      As Long
@@ -119,6 +118,9 @@ Public NpcStunTime                       As Long
 Public PlayerInmuneTime                  As Long
 Public MultiShotReduction                As Single
 Public HomeTimer                         As Integer
+Public HomeTimerAdventurer               As Integer
+Public HomeTimerHero                     As Integer
+Public HomeTimerLegend                   As Integer
 Public MagicSkillBonusDamageModifier     As Single
 Public MRSkillProtectionModifier         As Single
 Public MRSkillNpcProtectionModifier      As Single

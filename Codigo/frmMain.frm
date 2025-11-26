@@ -44,11 +44,6 @@ Begin VB.Form frmMain
       Top             =   120
       Width           =   1695
    End
-   Begin VB.Timer Timer1 
-      Interval        =   10000
-      Left            =   4440
-      Top             =   1920
-   End
    Begin VB.CommandButton Command3 
       Caption         =   "Recargar Donadore"
       Height          =   495
@@ -227,11 +222,6 @@ Begin VB.Form frmMain
       Left            =   240
       Top             =   4200
    End
-   Begin VB.Timer UptimeTimer 
-      Interval        =   1000
-      Left            =   3600
-      Top             =   3060
-   End
    Begin VB.Timer Truenos 
       Enabled         =   0   'False
       Interval        =   5000
@@ -391,12 +381,6 @@ Begin VB.Form frmMain
       Interval        =   60000
       Left            =   1680
       Top             =   3120
-   End
-   Begin VB.Timer TIMER_AI 
-      Enabled         =   0   'False
-      Interval        =   100
-      Left            =   4560
-      Top             =   3000
    End
    Begin VB.Frame Frame1 
       BackColor       =   &H00E0E0E0&
@@ -606,7 +590,6 @@ Public GuardarYCerrar           As Boolean
 Private tHechizosMinutesCounter As Byte
 Private Declare Function GetWindowThreadProcessId Lib "user32" (ByVal hwnd As Long, lpdwProcessId As Long) As Long
 Private Declare Function Shell_NotifyIconA Lib "SHELL32" (ByVal dwMessage As Long, lpData As NOTIFYICONDATA) As Integer
-Private SERVER_UPTIME As Long
 #If DIRECT_PLAY = 1 Then
     Implements DirectPlay8Event
     Private mfExit As Boolean
@@ -1670,37 +1653,6 @@ SubastaTimer_Timer_Err:
     Call TraceError(Err.Number, Err.Description, "frmMain.SubastaTimer_Timer", Erl)
 End Sub
 
-Private Sub TIMER_AI_Timer()
-    On Error GoTo ErrorHandler
-    Dim NpcIndex         As Long
-    Dim PerformanceTimer As Long
-    Call PerformanceTestStart(PerformanceTimer)
-    If Not haciendoBK Then
-        For NpcIndex = 1 To LastNPC
-            With NpcList(NpcIndex)
-                If .pos.Map > 0 Then
-                    If MapInfo(.pos.Map).NumUsers > 0 Or MapInfo(.pos.Map).ForceUpdate Then
-                        If .flags.NPCActive Then
-                            If .npcType = DummyTarget Then
-                                Call NpcDummyUpdate(NpcIndex)
-                            Else
-                                If .flags.Paralizado > 0 Then Call EfectoParalisisNpc(NpcIndex)
-                                If .flags.Inmovilizado > 0 Then Call EfectoInmovilizadoNpc(NpcIndex)
-                                If IntervaloPermiteMoverse(NpcIndex) Then Call NpcAI(NpcIndex)
-                            End If 'If .npcType = DummyTarget Then
-                        End If 'If .flags.NPCActive Then
-                    End If 'If MapInfo(.Pos.Map).NumUsers > 0 Then
-                End If 'If .Pos.Map > 0 Then
-            End With
-        Next NpcIndex
-    End If
-    Call PerformTimeLimitCheck(PerformanceTimer, "TIMER_AI_Timer", 600)
-    Exit Sub
-ErrorHandler:
-    Call TraceError(Err.Number, Err.Description & vbNewLine & "NPC: " & NpcList(NpcIndex).name & " en la posicion: " & NpcList(NpcIndex).pos.Map & "-" & NpcList(NpcIndex).pos.x _
-            & "-" & NpcList(NpcIndex).pos.y, "frmMain.Timer_AI", Erl)
-    Call MuereNpc(NpcIndex, 0)
-End Sub
 
 Private Sub TimerMeteorologia_Timer()
     'Call SendData(SendTarget.ToAll, 0, PrepareMessageLocaleMsg(1741, TimerMeteorologico, e_FontTypeNames.FONTTYPE_SERVER)) 'Msg1741=Servidor > Timer de lluvia en : ¬1
@@ -1870,12 +1822,4 @@ Private Sub Truenos_Timer()
     Exit Sub
 Truenos_Timer_Err:
     Call TraceError(Err.Number, Err.Description, "frmMain.Truenos_Timer", Erl)
-End Sub
-
-Private Sub UptimeTimer_Timer()
-    On Error GoTo UptimeTimer_Timer_Err
-    SERVER_UPTIME = SERVER_UPTIME + 1
-    Exit Sub
-UptimeTimer_Timer_Err:
-    Call TraceError(Err.Number, Err.Description, "frmMain.UptimeTimer_Timer", Erl)
 End Sub
