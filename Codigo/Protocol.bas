@@ -1549,10 +1549,10 @@ Private Sub HandleWalk(ByVal UserIndex As Integer)
                 Call WritePosUpdate(UserIndex)
             End If
         Else    'paralized
-            If Not .flags.UltimoMensaje = 1 Then
-                .flags.UltimoMensaje = 1
+            If Not .flags.UltimoMensaje = MSG_PARALYZED Then
+                .flags.UltimoMensaje = MSG_PARALYZED
                 'Msg1123= No podes moverte porque estas paralizado.
-                Call WriteLocaleMsg(UserIndex, 1123, e_FontTypeNames.FONTTYPE_INFO)
+                Call WriteLocaleMsg(UserIndex, MSG_PARALYZED, e_FontTypeNames.FONTTYPE_INFO)
                 Call WriteLocaleMsg(UserIndex, 54, e_FontTypeNames.FONTTYPE_INFO)
             End If
             Call WritePosUpdate(UserIndex)
@@ -2110,21 +2110,21 @@ Private Sub HandleWork(ByVal UserIndex As Integer)
                         "Ocultar", PacketTimerThreshold(PacketNames.Hide), MacroIterations(PacketNames.Hide)) Then Exit Sub
                 If .flags.Montado = 1 Then
                     '[CDT 17-02-2004]
-                    If Not .flags.UltimoMensaje = 3 Then
+                    If Not .flags.UltimoMensaje = MSG_CANNOT_HIDE_MOUNTED Then
                         ' Msg704=No podés ocultarte si estás montado.
-                        Call WriteLocaleMsg(UserIndex, 704, e_FontTypeNames.FONTTYPE_INFO)
-                        .flags.UltimoMensaje = 3
+                        Call WriteLocaleMsg(UserIndex, MSG_CANNOT_HIDE_MOUNTED, e_FontTypeNames.FONTTYPE_INFO)
+                        .flags.UltimoMensaje = MSG_CANNOT_HIDE_MOUNTED
                     End If
                     '[/CDT]
                     Exit Sub
                 End If
                 If .flags.Oculto = 1 Then
                     '[CDT 17-02-2004]
-                    If Not .flags.UltimoMensaje = 2 Then
+                    If Not .flags.UltimoMensaje = MSG_ALREADY_HIDDEN Then
                         Call WriteLocaleMsg(UserIndex, 55, e_FontTypeNames.FONTTYPE_INFO)
                         'Msg1127= Ya estás oculto.
-                        Call WriteLocaleMsg(UserIndex, 1127, e_FontTypeNames.FONTTYPE_INFO)
-                        .flags.UltimoMensaje = 2
+                        Call WriteLocaleMsg(UserIndex, MSG_ALREADY_HIDDEN, e_FontTypeNames.FONTTYPE_INFO)
+                        .flags.UltimoMensaje = MSG_ALREADY_HIDDEN
                     End If
                     '[/CDT]
                     Exit Sub
@@ -2360,7 +2360,7 @@ Private Sub HandleWorkLeftClick(ByVal UserIndex As Integer)
                         DummyInt = 1
                     ElseIf .EquippedMunitionObjIndex = 0 Then
                         DummyInt = 1
-                    ElseIf ObjData(.EquippedWeaponObjIndex).Proyectil <> 1 Then
+                    ElseIf ObjData(.EquippedWeaponObjIndex).Proyectil <> MSG_PARALYZED Then
                         DummyInt = 2
                     ElseIf ObjData(.EquippedMunitionObjIndex).OBJType <> e_OBJType.otArrows Then
                         DummyInt = 1
@@ -6272,21 +6272,20 @@ ErrHandler:
 End Sub
 
 Private Sub HandleLlamadadeClan(ByVal UserIndex As Integer)
-    'Author: Pablo Mercavides
     On Error GoTo ErrHandler
     With UserList(UserIndex)
         Dim refError   As String
         Dim clan_nivel As Byte
         If .GuildIndex <> 0 Then
             clan_nivel = modGuilds.NivelDeClan(.GuildIndex)
-            If clan_nivel >= 2 Then
+            If clan_nivel >= RequiredGuildLevelCallSupport Then
                 Call SendData(SendTarget.ToGuildMembers, .GuildIndex, PrepareMessageLocaleMsg(1818, .name & "¬" & get_map_name(.pos.Map) & "¬" & .pos.Map & "¬" & .pos.x & "¬" & _
                         .pos.y, e_FontTypeNames.FONTTYPE_GUILD)) ' Msg1818=Clan> [¬1] solicita apoyo de su clan en ¬2 (¬3-¬4-¬5). Puedes ver su ubicación en el mapa del mundo.
                 Call SendData(SendTarget.ToGuildMembers, .GuildIndex, PrepareMessagePlayWave("43", NO_3D_SOUND, NO_3D_SOUND))
                 Call SendData(SendTarget.ToGuildMembers, .GuildIndex, PrepareMessageUbicacionLlamada(.pos.Map, .pos.x, .pos.y))
             Else
-                'Msg1240= Servidor » El nivel de tu clan debe ser 2 para utilizar esta opción.
-                Call WriteLocaleMsg(UserIndex, 1240, e_FontTypeNames.FONTTYPE_INFO)
+                'Msg1240= Servidor » El nivel de tu clan debe ser ¬ o mayor para utilizar esta opción.
+                Call WriteLocaleMsg(UserIndex, 1240, e_FontTypeNames.FONTTYPE_INFO, RequiredGuildLevelCallSupport)
             End If
         End If
     End With
