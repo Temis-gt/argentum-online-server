@@ -412,6 +412,8 @@ Public Function HandleIncomingData(ByVal ConnectionID As Long, ByVal Message As 
             Call HandlePetStand(UserIndex)
         Case ClientPacketID.ePetFollow
             Call HandlePetFollow(UserIndex)
+        Case ClientPacketID.ePetFollowAll
+            Call HandlePetFollowAll(UserIndex)
         Case ClientPacketID.ePetLeave
             Call HandlePetLeave(UserIndex)
         Case ClientPacketID.eGrupoMsg
@@ -917,7 +919,7 @@ Public Function HandleIncomingData(ByVal ConnectionID As Long, ByVal Message As 
         HandleIncomingData = False
         Exit Function
     End If
-    Call PerformTimeLimitCheck(performance_timer, "Protocol handling message " & PacketId, 100)
+    Call PerformTimeLimitCheck(performance_timer, "Protocol handling message " & PacketID_to_string(PacketId), 100)
     HandleIncomingData = True
 End Function
 
@@ -3994,7 +3996,46 @@ Private Sub HandlePetFollow(ByVal UserIndex As Integer)
 HandlePetFollow_Err:
     Call TraceError(Err.Number, Err.Description, "Protocol.HandlePetFollow", Erl)
 End Sub
-
+Private Sub HandlePetFollowAll(ByVal UserIndex As Integer)
+    On Error GoTo HandlePetFollowAll_Err
+    With UserList(UserIndex)
+        'Dead users can't use pets
+        If .flags.Muerto = 1 Then
+            Call WriteLocaleMsg(UserIndex, 77, e_FontTypeNames.FONTTYPE_INFO)
+            Exit Sub
+        End If
+        'Validate target NPC
+        If Not IsValidNpcRef(.flags.TargetNPC) Then
+            ' Msg757=Primero tenés que seleccionar un personaje, hace click izquierdo sobre él.
+            Call WriteLocaleMsg(UserIndex, 757, e_FontTypeNames.FONTTYPE_INFO)
+            Exit Sub
+        End If
+        'Make sure it's close enough
+        If Distancia(NpcList(.flags.TargetNPC.ArrayIndex).pos, .pos) > 10 Then
+            'Msg1164= Estás demasiado lejos.
+            Call WriteLocaleMsg(UserIndex, 1164, e_FontTypeNames.FONTTYPE_INFO)
+            Exit Sub
+        End If
+        Dim i As Integer
+        Dim NpcIndex As Integer
+        For i = 1 To MAXMASCOTAS
+            If IsValidNpcRef(.MascotasIndex(i)) Then
+                NpcIndex = .MascotasIndex(i).ArrayIndex
+                If NpcList(NpcIndex).flags.NPCActive Then
+                    If IsValidUserRef(NpcList(NpcIndex).MaestroUser) Then
+                        If NpcList(NpcIndex).MaestroUser.ArrayIndex = UserIndex Then
+                            Call FollowAmo(NpcIndex)
+                            Call Expresar(NpcIndex, UserIndex)
+                        End If
+                    End If
+                End If
+            End If
+        Next i
+    End With
+    Exit Sub
+HandlePetFollowAll_Err:
+    Call TraceError(Err.Number, Err.Description, "Protocol.HandlePetFollowAll", Erl)
+End Sub
 ''
 ' Handles the "PetLeave" message.
 '
@@ -6047,10 +6088,10 @@ Private Sub HandleMoveItem(ByVal UserIndex As Integer)
             If .invent.Object(SlotNuevo).ObjIndex = .invent.Object(SlotViejo).ObjIndex And .invent.Object(SlotNuevo).ElementalTags = .invent.Object(SlotViejo).ElementalTags Then
                 .invent.Object(SlotNuevo).amount = .invent.Object(SlotNuevo).amount + .invent.Object(SlotViejo).amount
                 Dim Excedente As Integer
-                Excedente = .invent.Object(SlotNuevo).amount - MAX_INVENTORY_OBJS
+                Excedente = .invent.Object(SlotNuevo).amount - GetMaxInvOBJ()
                 If Excedente > 0 Then
                     .invent.Object(SlotViejo).amount = Excedente
-                    .invent.Object(SlotNuevo).amount = MAX_INVENTORY_OBJS
+                    .invent.Object(SlotNuevo).amount = GetMaxInvOBJ()
                 Else
                     If .invent.Object(SlotViejo).Equipped = 1 Then
                         .invent.Object(SlotNuevo).Equipped = 1
@@ -7092,7 +7133,7 @@ Public Sub HandleQuestAbandon(ByVal UserIndex As Integer)
                             If Not QuitarItem Then Exit For
                         Next
                         If QuitarItem Then
-                            Call QuitarObjetos(ObjIndex, MAX_INVENTORY_OBJS, UserIndex)
+                            Call QuitarObjetos(ObjIndex, GetMaxInvOBJ(), UserIndex)
                         End If
                     End If
                 Next i
@@ -7498,7 +7539,7 @@ Private Sub HandleAddCatalyst(ByVal UserIndex As Integer)
         If .CraftCatalyst.ObjIndex <> 0 Then Exit Sub
         .CraftCatalyst.ObjIndex = .invent.Object(Slot).ObjIndex
         .CraftCatalyst.amount = .invent.Object(Slot).amount
-        Call QuitarUserInvItem(UserIndex, Slot, MAX_INVENTORY_OBJS)
+        Call QuitarUserInvItem(UserIndex, Slot, GetMaxInvOBJ())
         Call UpdateUserInv(False, UserIndex, Slot)
         If .CraftResult Is Nothing Then
             Call WriteCraftingCatalyst(UserIndex, .CraftCatalyst.ObjIndex, .CraftCatalyst.amount, 0)
@@ -7837,7 +7878,7 @@ Dim Slot As Byte
             End If
             
             If .Invent_Skins.Object(Slot).Equipped = 0 Then
-                Call LogShopTransactions("PJ ID: " & .Id & " Nick: " & .name & " -> Borró el Skin: " & ObjData(.Invent_Skins.Object(Slot).ObjIndex).name & " Tipo: " & ObjData(.Invent_Skins.Object(Slot).ObjIndex).OBJType & " Valor: " & ObjData(.Invent_Skins.Object(Slot).ObjIndex).Valor)
+                Call LogShopTransactions("PJ ID: " & .Id & " Nick: " & .name & " -> Borró el Skin: " & ObjData(.Invent_Skins.Object(Slot).ObjIndex).name & " Tipo: " & ObjData(.Invent_Skins.Object(Slot).ObjIndex).ObjType & " Valor: " & ObjData(.Invent_Skins.Object(Slot).ObjIndex).Valor)
                 Call DesequiparSkin(UserIndex, Slot)
                 'Msg1287= Objeto eliminado correctamente.
                 .Invent_Skins.Object(Slot).Deleted = True
@@ -7994,6 +8035,21 @@ Public Function HandleStartAutomatedAction(ByVal UserIndex As Integer)
     x = reader.ReadInt8()
     y = reader.ReadInt8()
     skill = reader.ReadInt8()
+    Select Case skill
+        Case e_Skill.Pescar
+            If Not CanUserFish(UserIndex, x, y) Then
+                Exit Function
+            End If
+        Case e_Skill.Talar
+            If Not CanUserExtractResource(UserIndex, e_OBJType.otTrees, x, y) Then
+                Exit Function
+            End If
+        Case e_Skill.Mineria
+            If Not CanUserExtractResource(UserIndex, e_OBJType.otOreDeposit, x, y) Then
+                Exit Function
+            End If
+        Case Else
+    End Select
     Call StartAutomatedAction(x, y, skill, UserIndex)
     Exit Function
 HandleStartAutomatedAction_Err:

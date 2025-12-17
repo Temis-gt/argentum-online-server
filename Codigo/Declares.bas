@@ -1253,8 +1253,8 @@ Public Const ElvenWood                        As Integer = 2781 'OK
 Public Const Raices                           As Integer = 888 'OK
 Public Const Botella                          As Integer = 2097 'OK
 Public Const Cuchara                          As Integer = 163 'OK
-Public Const Mortero                          As Integer = 4304
-Public Const FrascoAlq                        As Integer = 4305
+Public Const Mortero                          As Integer = 4997
+Public Const FrascoAlq                        As Integer = 3075
 Public Const FrascoElixir                     As Integer = 4306
 Public Const Dosificador                      As Integer = 4307
 Public Const Orquidea                         As Integer = 4308
@@ -1461,7 +1461,7 @@ Public Const POCION_RESET            As Long = 3378
 Public Const MAXUSERQUESTS           As Integer = 5     'Maxima cantidad de quests que puede tener un usuario al mismo tiempo.
 ''
 ' Cantidad maxima de objetos por slot de inventario
-Public Const MAX_INVENTORY_OBJS      As Integer = 10000
+Public Const DEFAULT_MAX_INVENTORY_OBJS As Integer = 10000
 ''
 ' Cantidad de "slots" en el inventario con todos los slots desbloqueados
 Public Const MAX_INVENTORY_SLOTS     As Byte = 42
