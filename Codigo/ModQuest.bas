@@ -70,16 +70,16 @@ Public Sub FinishQuest(ByVal UserIndex As Integer, ByVal QuestIndex As Integer, 
     Dim NpcIndex       As Integer
     NpcIndex = UserList(UserIndex).flags.TargetNPC.ArrayIndex
     With QuestList(QuestIndex)
-        'Comprobamos que tenga los objetos.
+                'Comprobamos que tenga los objetos.
         If .RequiredOBJs > 0 Then
             For i = 1 To .RequiredOBJs
-                If TieneObjetos(.RequiredOBJ(i).ObjIndex, .RequiredOBJ(i).amount, UserIndex) = False Then
+                If TieneObjetos(.RequiredOBJ(i).ObjIndex, .RequiredOBJ(i).Amount, UserIndex) = False Then
                     Call WriteLocaleChatOverHead(UserIndex, "1336", "", NpcList(NpcIndex).Char.charindex, vbYellow) ' Msg1336=No has conseguido todos los objetos que te he pedido.
                     Exit Sub
                 End If
-                Call FinishGlobalQuest(UserIndex, .RequiredOBJ(i).Amount, .GlobalQuestIndex, .GlobalQuestThresholdNeeded)
             Next i
         End If
+
         'Comprobamos que haya matado todas las criaturas.
         If .RequiredNPCs > 0 Then
             For i = 1 To .RequiredNPCs
@@ -113,6 +113,7 @@ Public Sub FinishQuest(ByVal UserIndex As Integer, ByVal QuestIndex As Integer, 
                 Exit Sub
             End If
         End If
+
         'Comprobamos que el usuario tenga espacio para recibir los items.
         If .RewardOBJs > 0 Then
             'Buscamos la cantidad de slots de inventario libres.
@@ -125,6 +126,7 @@ Public Sub FinishQuest(ByVal UserIndex As Integer, ByVal QuestIndex As Integer, 
                 Exit Sub
             End If
         End If
+
         Dim KnownSkills As Integer
         If .RewardSpellCount > 0 Then
             For i = 1 To .RewardSpellCount
@@ -139,11 +141,13 @@ Public Sub FinishQuest(ByVal UserIndex As Integer, ByVal QuestIndex As Integer, 
                 Exit Sub
             End If
         End If
+
         'A esta altura ya cumplio los objetivos, entonces se le entregan las recompensas.
         Call WriteChatOverHead(UserIndex, "QUESTFIN*" & QuestIndex, NpcList(NpcIndex).Char.charindex, vbYellow)
-        'Si la quest pedia objetos, se los saca al personaje.
+                'Si la quest pedia objetos, se los saca al personaje.
         If .RequiredOBJs Then
             For i = 1 To .RequiredOBJs
+                Call FinishGlobalQuest(UserIndex, .RequiredOBJ(i).Amount, .GlobalQuestIndex, .GlobalQuestThresholdNeeded)
                 Call QuitarObjetos(.RequiredOBJ(i).ObjIndex, .RequiredOBJ(i).amount, UserIndex)
             Next i
         End If
@@ -656,6 +660,23 @@ Public Function CanUserAcceptQuest(ByVal UserIndex As Integer, ByVal NpcIndex As
         If UserDoneQuest(UserIndex, QuestIndex) Then
             Call WriteLocaleMsg(UserIndex, MSG_QUEST_ALREADY_COMPLETED, e_FontTypeNames.FONTTYPE_INFO)
             Exit Function
+        End If
+    End If
+    If tmpQuest.GlobalQuestIndex > 0 Then
+        If tmpQuest.GlobalQuestThresholdNeeded > 0 Then
+            If tmpQuest.GlobalQuestThresholdNeeded > GlobalQuestInfo(tmpQuest.GlobalQuestIndex).GatheringGlobalCounter Then
+                Call WriteLocaleMsg(UserIndex, 2123, FONTTYPE_WARNING, GlobalQuestInfo(tmpQuest.GlobalQuestIndex).GatheringGlobalCounter & "¬" & GlobalQuestInfo(tmpQuest.GlobalQuestIndex).GatheringThreshold & "¬" & tmpQuest.GlobalQuestThresholdNeeded)
+                Exit Function
+            End If
+        Else
+            If Not GlobalQuestInfo(tmpQuest.GlobalQuestIndex).IsActive Then
+                Call WriteLocaleMsg(UserIndex, 2124, FONTTYPE_WARNING)
+                Exit Function
+            End If
+            If GlobalQuestInfo(tmpQuest.GlobalQuestIndex).IsBossAlive Then
+                Call WriteLocaleMsg(UserIndex, 2121, FONTTYPE_WARNING)
+                Exit Function
+            End If
         End If
     End If
     CanUserAcceptQuest = True
