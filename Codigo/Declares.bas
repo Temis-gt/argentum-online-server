@@ -2051,8 +2051,6 @@ Public Type t_Char
     RM_Aura As String
     Otra_Aura As String
     speeding As Single
-    BodyIdle As Integer
-    Ataque1 As Integer
     Animation() As Integer
     CastAnimation As Integer
 End Type
@@ -2279,8 +2277,10 @@ Public Type t_ObjData
     LingoteIndex As Integer
     MinHIT As Integer 'Minimo golpe
     MaxHit As Integer 'Maximo golpe
-    IgnoreArmorAmmount As Integer
-    IgnoreArmorPercent As Single
+    MinArmorPenetrationFlat As Integer
+    MaxArmorPenetrationFlat As Integer
+    ArmorPenetrationPercent As Integer
+    ExtraCritAndStabChance As Integer
     MinHam As Integer
     MinSed As Integer
     def As Integer
@@ -3207,8 +3207,6 @@ Public Type t_NpcInfoCache
     Body As Integer
     Head As Integer
     Heading As Integer
-    BodyIdle As Integer
-    Ataque1 As Integer
     CastAnimation As Integer
     AnimacionesCount As Integer
     Animaciones() As Integer
