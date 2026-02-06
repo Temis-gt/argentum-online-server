@@ -1423,12 +1423,11 @@ Public Enum e_Skill
     Sastreria = 23
     Domar = 24
     TargetableItem = 25
+    Smelting = 26
     Grupo = 90
     MarcaDeClan = 91
     MarcaDeGM = 92
 End Enum
-
-Public Const FundirMetal = 88
 
 Public Enum e_Atributos
     Fuerza = 1
@@ -2394,6 +2393,7 @@ Public Type t_ObjData
     ProjectileType As Integer
     ObjFlags As Long 'use bitmask from enum e_ObjFlags
     JineteLevel As Byte
+    FactionScore As Integer
     ElementalTags As Long
     Camouflage As Boolean
     RequiereObjeto                  As Integer
