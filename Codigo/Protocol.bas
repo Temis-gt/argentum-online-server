@@ -33,7 +33,7 @@ Option Explicit
 Public Const SEPARATOR As String * 1 = vbNullChar
 Private Const SPELL_UNASSISTED_DARDO = 1
 Private Const SPELL_UNASSISTED_RUGIDO_SALVAJE = 5
-Private Const SPELL_UNASSISTED_RUGIDO_ARCANO = 348
+
 Private Const SPELL_UNASSISTED_FULGOR_IGNEO = 52
 Private Const SPELL_UNASSISTED_LATIDO_IGNEO = 349
 Private Const SPELL_UNASSISTED_ECO_IGNEO = 61
@@ -4261,6 +4261,7 @@ Private Sub HandleHeal(ByVal UserIndex As Integer)
         End If
         If (NpcList(.flags.TargetNPC.ArrayIndex).npcType <> e_NPCType.Revividor And NpcList(.flags.TargetNPC.ArrayIndex).npcType <> e_NPCType.ResucitadorNewbie) Or .flags.Muerto _
                 <> 0 Then Exit Sub
+        If .pos.Map = MAP_HOME_IN_JAIL And NpcList(.flags.TargetNPC.ArrayIndex).npcType = e_NPCType.Revividor Then Exit Sub
         If Distancia(.pos, NpcList(.flags.TargetNPC.ArrayIndex).pos) > 10 Then
             Call WriteLocaleMsg(UserIndex, 8, e_FontTypeNames.FONTTYPE_INFO)
             Exit Sub
@@ -7066,6 +7067,12 @@ Private Sub HandleConsulta(ByVal UserIndex As Integer)
                 Call WriteLocaleMsg(UserIndex, 1265, e_FontTypeNames.FONTTYPE_INFO)
                 Exit Sub
             End If
+            'Si el gm es Consejero y el usuario esta en zona insegura, no puede ir
+            If e_PlayerType.Consejero And MapInfo(UserList(UserConsulta.ArrayIndex).pos.Map).Seguro = 0 Then
+                'Msg2165=El usuario ¬1 se encuentra en zona insegura, no puedes acercarte a él.
+                Call WriteLocaleMsg(UserIndex, 2165, e_FontTypeNames.FONTTYPE_INFO, Nick)
+                Exit Sub
+            End If
         Else
             Call SetUserRef(UserConsulta, .flags.TargetUser.ArrayIndex)
             'Se asegura que el target exista
@@ -7270,7 +7277,7 @@ End Sub
 
 Private Function IsUnassistedSpellAllowed(ByVal spellID As Integer) As Boolean
     Select Case spellID
-        Case SPELL_UNASSISTED_DARDO, SPELL_UNASSISTED_RUGIDO_SALVAJE, SPELL_UNASSISTED_RUGIDO_ARCANO, SPELL_UNASSISTED_FULGOR_IGNEO, SPELL_UNASSISTED_LATIDO_IGNEO, SPELL_UNASSISTED_ECO_IGNEO, SPELL_UNASSISTED_DESTELLO_MALVA, _
+        Case SPELL_UNASSISTED_DARDO, SPELL_UNASSISTED_RUGIDO_SALVAJE, SPELL_UNASSISTED_FULGOR_IGNEO, SPELL_UNASSISTED_LATIDO_IGNEO, SPELL_UNASSISTED_ECO_IGNEO, SPELL_UNASSISTED_DESTELLO_MALVA, _
             SPELL_UNASSISTED_FRACTURA_GLACIAL, SPELL_UNASSISTED_ALIENTO_CARMESI, SPELL_UNASSISTED_ENERGIA_ANCESTRAL
             IsUnassistedSpellAllowed = True
         Case Else
@@ -7321,7 +7328,8 @@ Private Sub HandleHome(ByVal UserIndex As Integer)
                 End If
                 
                 If .Stats.GLD < homeCostGLD Then
-                    Call WriteLocaleMsg(UserIndex, 2163, e_FontTypeNames.FONTTYPE_INFO, homeCostGLD)
+                    'Msg2164=Para utilizar este comando necesitas ¬1 monedas de oro.
+                    Call WriteLocaleMsg(UserIndex, 2164, e_FontTypeNames.FONTTYPE_INFO, homeCostGLD)
                     Exit Sub
                 End If
                 
