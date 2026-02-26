@@ -1542,50 +1542,86 @@ End Function
 Function SaveInventorySkins(ByVal UserIndex As Integer) As Boolean
 
 Dim i                           As Integer
-Dim sQuery                      As cStringBuilder    'About
-Dim Params()                    As Variant
-Dim ParamC                      As Long
-Dim UpsertRowsCount             As Long
-Dim SkinID                      As Long
+Dim UpsertCount                 As Long
+Dim DeleteCount                 As Long
+Dim SkinId                      As Long
+Dim UpsertParams()              As Variant
+Dim DeleteParams()              As Variant
+Dim UpsertSql                   As cStringBuilder
+Dim DeleteSql                   As cStringBuilder
+Dim UpsertParamIndex            As Long
+Dim DeleteParamIndex            As Long
 
     On Error GoTo SaveInventorySkins_Error
 
     With UserList(UserIndex)
         If .Id > 0 And .Invent_Skins.count > 0 Then
             For i = 1 To .Invent_Skins.count
-                If .Invent_Skins.Object(i).ObjIndex > 0 And Not .Invent_Skins.Object(i).Deleted Then
-                    UpsertRowsCount = UpsertRowsCount + 1
+                SkinId = .Invent_Skins.Object(i).ObjIndex
+
+                If SkinId > 0 Then
+                    If .Invent_Skins.Object(i).Deleted Then
+                        DeleteCount = DeleteCount + 1
+                    Else
+                        UpsertCount = UpsertCount + 1
+                    End If
                 End If
             Next i
 
-            Call Execute("DELETE FROM inventory_item_skins WHERE user_id = ?;", .Id)
+            If UpsertCount > 0 Then
+                ReDim UpsertParams(0 To (UpsertCount * 4) - 1)
+                Set UpsertSql = New cStringBuilder
+                UpsertSql.Append "INSERT INTO inventory_item_skins (user_id, skin_id, type_skin, skin_equipped) VALUES "
 
-            If UpsertRowsCount > 0 Then
-                Set sQuery = New cStringBuilder
-                sQuery.Append "INSERT INTO inventory_item_skins (user_id, skin_id, type_skin, skin_equipped) VALUES "
-
-                ReDim Params(UpsertRowsCount * 4 - 1)
-                ParamC = 0
+                UpsertParamIndex = 0
 
                 For i = 1 To .Invent_Skins.count
-                    If .Invent_Skins.Object(i).ObjIndex > 0 And Not .Invent_Skins.Object(i).Deleted Then
-                        If ParamC > 0 Then
-                            sQuery.Append ", "
+                    SkinId = .Invent_Skins.Object(i).ObjIndex
+
+                    If SkinId > 0 And Not .Invent_Skins.Object(i).Deleted Then
+                        If UpsertParamIndex > 0 Then
+                            UpsertSql.Append ","
                         End If
 
-                        sQuery.Append "(?, ?, ?, ?)"
-
-                        SkinID = .Invent_Skins.Object(i).ObjIndex
-                        Params(ParamC) = .Id
-                        Params(ParamC + 1) = SkinID
-                        Params(ParamC + 2) = ObjData(SkinID).OBJType
-                        Params(ParamC + 3) = IIf(.Invent_Skins.Object(i).Equipped, 1, 0)
-                        ParamC = ParamC + 4
+                        UpsertSql.Append "(?, ?, ?, ?)"
+                        UpsertParams(UpsertParamIndex) = .Id
+                        UpsertParams(UpsertParamIndex + 1) = SkinId
+                        UpsertParams(UpsertParamIndex + 2) = ObjData(SkinId).OBJType
+                        UpsertParams(UpsertParamIndex + 3) = Abs(CInt(.Invent_Skins.Object(i).Equipped))
+                        UpsertParamIndex = UpsertParamIndex + 4
                     End If
                 Next i
 
-                Call Execute(sQuery.ToString(), Params)
-                Set sQuery = Nothing
+                UpsertSql.Append " ON CONFLICT(user_id, skin_id) DO UPDATE SET type_skin = excluded.type_skin, skin_equipped = excluded.skin_equipped"
+                Call Execute(UpsertSql.ToString, UpsertParams)
+                Set UpsertSql = Nothing
+            End If
+
+            If DeleteCount > 0 Then
+                ReDim DeleteParams(0 To DeleteCount)
+                Set DeleteSql = New cStringBuilder
+                DeleteSql.Append "DELETE FROM inventory_item_skins WHERE user_id = ? AND skin_id IN ("
+                DeleteParams(0) = .Id
+
+                DeleteParamIndex = 1
+
+                For i = 1 To .Invent_Skins.count
+                    SkinId = .Invent_Skins.Object(i).ObjIndex
+
+                    If SkinId > 0 And .Invent_Skins.Object(i).Deleted Then
+                        If DeleteParamIndex > 1 Then
+                            DeleteSql.Append ","
+                        End If
+
+                        DeleteSql.Append "?"
+                        DeleteParams(DeleteParamIndex) = SkinId
+                        DeleteParamIndex = DeleteParamIndex + 1
+                    End If
+                Next i
+
+                DeleteSql.Append ")"
+                Call Execute(DeleteSql.ToString, DeleteParams)
+                Set DeleteSql = Nothing
             End If
 
             SaveInventorySkins = True
