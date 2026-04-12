@@ -655,18 +655,9 @@ Sub Main()
     tInicioServer = GetTickCountRaw()
     #If UNIT_TEST = 1 Then
         Call UnitTesting.Init
-        Debug.Print "AO20 Unit Testing"
         Dim suite_passed_ok As Boolean
         suite_passed_ok = UnitTesting.test_suite()
-        If (suite_passed_ok) Then
-            Debug.Print "suite_passed_ok!!!"
-        Else
-            Debug.Print "suite failed!!!"
-        End If
-        Debug.Assert (suite_passed_ok)
-        Debug.Print "Running proto suite, trying to connect to 127.0.0.1:7667"
-        Call UnitClient.Init
-        Call UnitClient.Connect("127.0.0.1", "7667")
+        Call UnitTesting.WriteResultsToFile(App.Path & "\test_results.txt")
     #End If
     While (True)
         GlobalFrameTime = GetTickCountRaw()
@@ -1448,7 +1439,7 @@ Sub PasarSegundo()
                 If .Counters.TimerBarra > 0 Then
                     .Counters.TimerBarra = .Counters.TimerBarra - 1
                     If .Counters.TimerBarra = 0 Then
-                        Call EndProgrammedAction(i)
+                        Call CompletePendingAction(i)
                     End If
                 End If
                 If .flags.UltimoMensaje > 0 Then
