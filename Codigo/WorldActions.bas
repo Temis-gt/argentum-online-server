@@ -291,63 +291,68 @@ Private Sub HandleFactionRecruiterNpcInteraction(ByVal UserIndex As Integer, ByV
     End If
 End Sub
 
+Private Function GetCityName(ByVal city As e_Ciudad) As String
+    Select Case city
+        Case e_Ciudad.cUllathorpe
+            GetCityName = "Ullathorpe"
+        Case e_Ciudad.cNix
+            GetCityName = "Nix"
+        Case e_Ciudad.cBanderbill
+            GetCityName = "Banderbill"
+        Case e_Ciudad.cLindos
+            GetCityName = "Lindos"
+        Case e_Ciudad.cArghal
+            GetCityName = "Arghal"
+        Case e_Ciudad.cForgat
+            GetCityName = "Forgat"
+        Case e_Ciudad.cEldoria
+            GetCityName = "Eldoria"
+        Case e_Ciudad.cArkhein
+            GetCityName = "Arkhein"
+        Case e_Ciudad.cPenthar
+            GetCityName = "Penthar"
+        Case Else
+            GetCityName = "Ullathorpe"
+    End Select
+End Function
+
 Private Sub HandleGovernorNpcInteraction(ByVal UserIndex As Integer, ByVal NpcIndex As Integer)
     If UserList(UserIndex).flags.Muerto = 1 Then
         'Msg77=¡¡Estás muerto!!.
         Call WriteLocaleMsg(UserIndex, MSG_MUERTO, e_FontTypeNames.FONTTYPE_INFOIAO)
         Exit Sub
     End If
+
     If Distancia(NpcList(NpcIndex).pos, UserList(UserIndex).pos) > 3 Then
         Call WriteLocaleMsg(UserIndex, MSG_SACERDOTE_PUEDE_CURARTE_DEBIDO_DEMASIADO_LEJOS, e_FontTypeNames.FONTTYPE_INFO)
         'Msg8=Estas demasiado lejos del gobernador.
         Exit Sub
     End If
+
     Dim DeDonde    As String
     Dim Gobernador As t_Npc
+
     Gobernador = NpcList(NpcIndex)
+
     If UserList(UserIndex).Hogar = Gobernador.GobernadorDe Then
         Call WriteLocaleChatOverHead(UserIndex, 1349, "", Gobernador.Char.charindex, vbWhite) ' Msg1349=Ya perteneces a esta ciudad. Gracias por ser uno más de nosotros.
         Exit Sub
     End If
-    If UserList(UserIndex).Faccion.Status = 0 Or UserList(UserIndex).Faccion.Status = 2 Then
-        If Gobernador.GobernadorDe = e_Ciudad.cBanderbill Then
-            Call WriteLocaleChatOverHead(UserIndex, "1350", "", Gobernador.Char.charindex, vbWhite) ' Msg1350=Aquí no aceptamos criminales.
-            Exit Sub
-        End If
+
+    If (UserList(UserIndex).Faccion.Status = 0 Or UserList(UserIndex).Faccion.Status = 2) And Gobernador.GobernadorDe = e_Ciudad.cBanderbill Then
+        Call WriteLocaleChatOverHead(UserIndex, "1350", "", Gobernador.Char.charindex, vbWhite) ' Msg1350=Aquí no aceptamos criminales.
+        Exit Sub
     End If
-    If UserList(UserIndex).Faccion.Status = 3 Or UserList(UserIndex).Faccion.Status = 1 Then
-        If Gobernador.GobernadorDe = e_Ciudad.cArkhein Then
-            Call WriteLocaleChatOverHead(UserIndex, "1351", "", Gobernador.Char.charindex, vbWhite) ' Msg1351=¡¡Sal de aquí ciudadano asqueroso!!
-            Exit Sub
-        End If
+
+    If (UserList(UserIndex).Faccion.Status = 3 Or UserList(UserIndex).Faccion.Status = 1) And Gobernador.GobernadorDe = e_Ciudad.cArkhein Then
+        Call WriteLocaleChatOverHead(UserIndex, "1351", "", Gobernador.Char.charindex, vbWhite) ' Msg1351=¡¡Sal de aquí ciudadano asqueroso!!
+        Exit Sub
     End If
-    If UserList(UserIndex).Hogar <> Gobernador.GobernadorDe Then
-        UserList(UserIndex).PosibleHogar = Gobernador.GobernadorDe
-        Select Case UserList(UserIndex).PosibleHogar
-            Case e_Ciudad.cUllathorpe
-                DeDonde = "Ullathorpe"
-            Case e_Ciudad.cNix
-                DeDonde = "Nix"
-            Case e_Ciudad.cBanderbill
-                DeDonde = "Banderbill"
-            Case e_Ciudad.cLindos
-                DeDonde = "Lindos"
-            Case e_Ciudad.cArghal
-                DeDonde = "Arghal"
-            Case e_Ciudad.cForgat
-                DeDonde = "Forgat"
-            Case e_Ciudad.cEldoria
-                DeDonde = "Eldoria"
-            Case e_Ciudad.cArkhein
-                DeDonde = "Arkhein"
-            Case e_Ciudad.cPenthar
-                DeDonde = "Penthar"
-            Case Else
-                DeDonde = "Ullathorpe"
-        End Select
-        UserList(UserIndex).flags.pregunta = 3
-        Call WritePreguntaBox(UserIndex, 1592, DeDonde)
-    End If
+
+    UserList(UserIndex).PosibleHogar = Gobernador.GobernadorDe
+    DeDonde = GetCityName(UserList(UserIndex).PosibleHogar)
+    UserList(UserIndex).flags.pregunta = 3
+    Call WritePreguntaBox(UserIndex, 1592, DeDonde)
 End Sub
 
 Private Sub HandleFishingDeliveryNpcInteraction(ByVal UserIndex As Integer, ByVal NpcIndex As Integer)
@@ -356,21 +361,11 @@ Private Sub HandleFishingDeliveryNpcInteraction(ByVal UserIndex As Integer, ByVa
         Call WriteLocaleMsg(UserIndex, MSG_SOLO_TRABAJADORES_PUEDEN_REGISTRAR_PECES_ESPECIALES, e_FontTypeNames.FONTTYPE_INFOIAO)
         Exit Sub
     End If
-    Dim i                   As Integer, j As Integer
     Dim PuntosTotales       As Long
-    Dim CantPecesEspeciales As Long
     Dim OroTotal            As Long
-    CantPecesEspeciales = UBound(PecesEspeciales)
-    If CantPecesEspeciales > 0 Then
-        For i = 1 To MAX_INVENTORY_SLOTS
-            For j = 1 To CantPecesEspeciales
-                If UserList(UserIndex).invent.Object(i).ObjIndex = PecesEspeciales(j).ObjIndex Then
-                    PuntosTotales = PuntosTotales + (ObjData(UserList(UserIndex).invent.Object(i).ObjIndex).PuntosPesca * UserList(UserIndex).invent.Object(i).amount)
-                    OroTotal = OroTotal + (ObjData(UserList(UserIndex).invent.Object(i).ObjIndex).Valor * UserList(UserIndex).invent.Object(i).amount)
-                End If
-            Next j
-        Next i
-    End If
+
+    Call CalculateSpecialFishingRewards(UserIndex, PuntosTotales, OroTotal)
+
     If PuntosTotales > 0 Then
         UserList(UserIndex).flags.pregunta = 5
         Call WritePreguntaBox(UserIndex, 1593, PuntosTotales & "¿" & PonerPuntos(OroTotal * 1.2)) 'Msg1593= Tienes un total de ¿1 puntos y ¿2 monedas de oro para reclamar, ¿Deseas aceptar?
@@ -378,6 +373,23 @@ Private Sub HandleFishingDeliveryNpcInteraction(ByVal UserIndex As Integer, ByVa
         Dim charindexstr As Integer
         charindexstr = str$(NpcList(NpcIndex).Char.charindex)
         Call WriteLocaleChatOverHead(UserIndex, "1352", "", charindexstr, &HFFFF00) ' Msg1352=No tienes ningún trofeo de pesca para entregar.
+    End If
+End Sub
+
+Private Sub CalculateSpecialFishingRewards(ByVal UserIndex As Integer, ByRef totalPoints As Long, ByRef totalGold As Long)
+    Dim i                   As Integer, j As Integer
+    Dim CantPecesEspeciales As Long
+
+    CantPecesEspeciales = UBound(PecesEspeciales)
+    If CantPecesEspeciales > 0 Then
+        For i = 1 To MAX_INVENTORY_SLOTS
+            For j = 1 To CantPecesEspeciales
+                If UserList(UserIndex).invent.Object(i).ObjIndex = PecesEspeciales(j).ObjIndex Then
+                    totalPoints = totalPoints + (ObjData(UserList(UserIndex).invent.Object(i).ObjIndex).PuntosPesca * UserList(UserIndex).invent.Object(i).amount)
+                    totalGold = totalGold + (ObjData(UserList(UserIndex).invent.Object(i).ObjIndex).Valor * UserList(UserIndex).invent.Object(i).amount)
+                End If
+            Next j
+        Next i
     End If
 End Sub
 
