@@ -712,7 +712,7 @@ End Sub
 
 Private Sub ConfigMapLobby()
     Dim i As Integer
-    Call ModLobby.SetTeamCount(LobbyList(LobbyIndex), 2, LobbyList(LobbyIndex).TeamType)
+    Call ModLobby.SetTeamCount(LobbyList(LobbyIndex), 2, eRandom)
     For i = 0 To UBound(MapNumbers)
         MapInfo(MapNumbers(i)).Seguro = 1
         MapInfo(MapNumbers(i)).SinInviOcul = True

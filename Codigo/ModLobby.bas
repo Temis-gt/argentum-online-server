@@ -95,6 +95,7 @@ Type t_Lobby
     IsGlobal As Boolean
     MapOpenTime As Long
     BroadOpenEvent As t_Timer
+    FullLobby As Boolean
 End Type
 
 Public Type t_response
@@ -629,6 +630,7 @@ Public Sub UpdateWaitingForPlayers(ByVal frametime As Long, ByRef instance As t_
         End If
     Else
         If instance.RegisteredPlayers >= instance.MaxPlayers Then
+            instance.FullLobby = True
             Call StartLobby(instance, -1)
         End If
     End If
@@ -790,7 +792,7 @@ Public Sub StartLobby(ByRef instance As t_Lobby, ByVal UserIndex As Integer)
         Call WriteLocaleMsg(UserIndex, MSG_EVENT_ALREADY_STARTED, e_FontTypeNames.FONTTYPE_INFO) 'Msg1605= El evento ya fue iniciado.
         Exit Sub
     End If
-    If (instance.TeamSize > 1 Or instance.TeamType = eFixedTeamCount) And instance.TeamType = eRandom Then
+    If instance.SortType = eFixedTeamCount Or instance.TeamType = eRandom Then
         Call SortTeams(instance)
     End If
     Call ModLobby.UpdateLobbyState(instance, e_LobbyState.InProgress)
