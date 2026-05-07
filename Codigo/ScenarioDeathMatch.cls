@@ -382,13 +382,6 @@ Public Sub IBaseScenario_UpdateLobbyState(ByVal oldState As e_LobbyState, ByRef 
     If NewState = InProgress Then
         Call ModLobby.SummonAll(LobbyList(LobbyIndex))
         Call SetTimer(CountdownTimer, 1000)
-        
-        ' Si se llenó el cupo, reducir el cd a 5 segundos
-        If LobbyList(LobbyIndex).FullLobby Then
-            CountdownTimer.Interval = 1000
-            ' Saltar directo a 5 ocurrencias
-            CountdownTimer.Occurrences = 5
-        End If
     End If
     If NewState = Closed Then
         Call MatchCompleted

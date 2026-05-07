@@ -659,6 +659,7 @@ Public Sub ForceReset(ByRef instance As t_Lobby)
     instance.State = UnInitilized
     instance.SummonCoordinates.Map = -1
     instance.ClassFilter = -1
+    instance.FullLobby = False
     If Not Scenario Is Nothing Then
         Call Scenario.Reset
     End If
