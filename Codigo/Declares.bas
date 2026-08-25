@@ -2553,6 +2553,7 @@ Public Type t_UserStats
     NumObj_PezEspecial As Integer
     Creditos As Long
     JineteLevel As Byte
+    RemortCount As Long
 End Type
 
 'Sistema de Barras
@@ -2976,7 +2977,19 @@ Public Const HotKeyCount As Integer = 10
 
 Public Const HOO_CAP_PROTOCOL_VERSION As Byte = 1
 Public Const HOO_CAP_ADJACENT_CHARACTERS_V1 As Long = &H1&
+Public Const HOO_CAP_REMORT_V1 As Long = &H2&
 Public Const HOO_FEATURE_ADJACENT_CHARACTERS_V1 As String = "hoo-adjacent-characters-v1"
+Public Const HOO_FEATURE_REMORT_V1 As String = "hoo-remort-v1"
+
+Public Enum e_RemortEligibilityReason
+    eRemortEligibility_Eligible = 0
+    eRemortEligibility_BelowRequiredLevel = 1
+    eRemortEligibility_Dead = 2
+    eRemortEligibility_ActiveQuest = 3
+    eRemortEligibility_InParty = 4
+    eRemortEligibility_InvalidEquipment = 5
+    eRemortEligibility_RemortLimitReached = 6
+End Enum
 
 Public Type t_HooClientCapabilities
     Negotiated As Boolean
@@ -3206,6 +3219,24 @@ Public Type t_NpcPathFindingInfo
     '  if a NPC or a User moves over the npc's path, blocking
     '  its way, the function NpcLegalPos set PathLenght to 0
     '  forcing the seek of a new path.
+End Type
+
+Public Enum e_NpcCrossMapRouteMode
+    eNpcCrossMapRouteNone = 0
+    eNpcCrossMapRouteChase = 1
+    eNpcCrossMapRouteReturnHome = 2
+End Enum
+
+Public Type t_NpcCrossMapRoute
+    Mode As e_NpcCrossMapRouteMode
+    TargetMap As Integer
+    NextMap As Integer
+    ExitX As Byte
+    ExitY As Byte
+    DestinationX As Byte
+    DestinationY As Byte
+    HopsCrossed As Byte
+    PathFailures As Byte
 End Type
 
 Public Type t_Caminata
@@ -3454,6 +3485,7 @@ Public Type t_Npc
     Mascotas As Integer
     ' New!! Needed for pathfindig
     pathFindingInfo As t_NpcPathFindingInfo
+    CrossMapRoute As t_NpcCrossMapRoute
     ' Esto es del Areas.bas
     AreasInfo As t_AreaInfo
     
